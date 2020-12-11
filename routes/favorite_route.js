@@ -1,3 +1,8 @@
 const route = require('express').Router()
+const FavController = require('../controllers/favorite')
+
+route.post('/', FavController.postFavorite)
+route.get('/', FavController.getAllFavorite)
+route.delete('/:id', FavController.deleteFavPet)
 
 module.exports = route

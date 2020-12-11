@@ -15,6 +15,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   access_token = null
+
 })
 
 describe('add new pet test', () => {
