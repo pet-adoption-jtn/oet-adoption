@@ -6,8 +6,23 @@ const pets = db.collection('Pets')
 class PetController {
   static async readAll (req, res, next) {
     try {
-      const petlist = await pets.find({}).toArray()
-      res.status(200).json(petlist)
+      const petlist = await pets.aggregate([
+        {
+          $lookup: {
+            from: 'Users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'Owner'
+          }
+        },
+        {
+          $unwind: {
+            path: '$Owner'
+          }
+        }
+      ])
+      const list = await petlist.toArray()
+      res.status(200).json(list)
 
     } catch (error) {
       next(error)
@@ -17,11 +32,29 @@ class PetController {
   static async getOnePet (req, res, next) {
     try {
       const id = req.params.id
-      const pet = await pets.findOne({
-        "_id": ObjectID(id)
-      })
+      const pet = await pets.aggregate([
+        {
+          $match: {
+            _id: ObjectID(id)
+          }
+        },
+        {
+          $lookup: {
+            from: 'Users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'Owner'
+          }
+        },
+        {
+          $unwind: {
+            path: '$Owner'
+          }
+        }
+      ])
       if (pet) {
-        res.status(200).json(pet)
+        const detail = await pet.toArray()
+        res.status(200).json(detail[0])
       } else {
         throw { status: 404, message: 'Pet is not found' }
       }
