@@ -7,10 +7,14 @@ class FavoritesPetController {
   static async postFavorite(req, res, next) {
     try {
       const dataBody = req.body
-      const newFavData = await FavPetColl.insertOne(dataBody)
-      res.status(200).json(newFavData.ops[0])
+      if(!dataBody.name) {
+        throw { message: 'Empty Data' , status: 400 }
+      } else {
+        const newFavData = await FavPetColl.insertOne(dataBody)
+        res.status(200).json(newFavData.ops[0])
+      }
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 
@@ -19,7 +23,7 @@ class FavoritesPetController {
       const allDataFav = await FavPetColl.find().toArray()
       res.status(200).json(allDataFav)
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 
@@ -33,7 +37,7 @@ class FavoritesPetController {
         res.status(401).json({ msg: "No documents matched the query. Deleted 0 documents." })
       }
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 }
