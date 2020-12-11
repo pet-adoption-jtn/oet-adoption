@@ -21,7 +21,7 @@ describe('TEST ENDPOINT /register', () => {
     await connection.close();
   });
     
-  it('testing register is successfull', async (done) => {
+  it(('testing register is successfull'), async (done) => {
     const newUser = {
       username: 'example',
       email: 'example@mail.com',
@@ -43,6 +43,28 @@ describe('TEST ENDPOINT /register', () => {
       })
       .catch(done)
   });
+
+  it (('testing register when email is unique'), async (done) => {
+    const newUser = {
+      username: 'example',
+      email: 'example@mail.com',
+      password: '123456',
+      address: 'jakarta',
+      phone: '08123456789'
+    };
+
+    request(app)
+    .post('/register')
+    .send(newUser)
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(400)
+        expect(body).toHaveProperty('message', 'Email is already exists')
+
+        done()
+      })
+      .catch(done)
+  })
 
   it(('testing register if password is less than 6 characters'), async (done) => {
     const newUser = {

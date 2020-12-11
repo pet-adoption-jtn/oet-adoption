@@ -1,6 +1,5 @@
 module.exports = function error_handler (err, req, res, next) {
   console.log(err)
-  console.log(err.name)
   let status = err.status || 500
   let message = err.message || 'Internal Server Error'
   if (err.name === 'MongoError') {

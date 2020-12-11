@@ -19,18 +19,23 @@ class UserController {
       } else if (email === '' || address === '' || phone === '') {
         throw ({ status: 400, message: 'Please fill all the columns' })
       } else {
-        const response = await users.insertOne({
-          username,
-          email,
-          password: hashPassword(password),
-          address,
-          phone
-        })
-        res.status(201).json({
-          email: response.ops[0].email,
-          _id: response.ops[0]._id,
-          username: response.ops[0].username
-        })
+        const unique = await users.findOne({ email: email})
+        if (unique) {
+          throw ({ status: 400, message: 'Email is already exists' })
+        } else {
+          const response = await users.insertOne({
+            username,
+            email,
+            password: hashPassword(password),
+            address,
+            phone
+          })
+          res.status(201).json({
+            email: response.ops[0].email,
+            _id: response.ops[0]._id,
+            username: response.ops[0].username
+          })
+        }
       }
     } catch (error) {
       next(error)
