@@ -1,3 +1,101 @@
 const { db } = require('../config/mongo')
+const { ObjectID } = require('mongodb')
 
-const users = db.collection('Pets')
+const pets = db.collection('Pets')
+
+class PetController {
+  static async readAll (req, res, next) {
+    try {
+      const petlist = await pets.find({}).toArray()
+      res.status(200).json(petlist)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async getOnePet (req, res, next) {
+    try {
+      const id = req.params.id
+      const pet = await pets.findOne({
+        "_id": ObjectID(id)
+      })
+      if (pet) {
+        res.status(200).json(pet)
+      } else {
+        throw { status: 404, message: 'Pet is not found' }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async addPet (req, res, next) {
+    try {
+      const user = req.userLoggedIn
+      const payload = { 
+        name: req.body.name,
+        breed: req.body.breed,
+        age: req.body.age,
+        gender: req.body.gender,
+        color: req.body.color,
+        user_id: ObjectID(user._id)
+      }
+      const result = await pets.insertOne(payload)
+      if (result.insertedCount !== 1) {
+        throw { message: 'Insert Pet Failed', status: 400 }
+      } else {
+        res.status(201).json(result.ops[0])
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async updatePet(req, res, next) {
+    try {
+      const id = req.params.id
+      const user = req.userLoggedIn
+      const payload = { 
+        name: req.body.name,
+        breed: req.body.breed,
+        age: req.body.age,
+        gender: req.body.gender,
+        color: req.body.color,
+        user_id: ObjectID(user._id)
+      }
+      const result = await pets.findOneAndUpdate({
+        "_id": ObjectID(id)
+      }, {
+        $set: payload
+      }, {
+        returnOriginal: false
+      })
+      if (result.value) {
+        res.status(200).json(result.value)
+      } else {
+        throw { message: 'Update failed', status: 400 }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async deletePet (req, res, next) {
+    try {
+      const id = req.params.id
+      const result = await pets.deleteOne({
+        "_id": ObjectID(id)
+      })
+      if (result.deletedCount === 1) {
+        res.status(200).json({ message: 'Successfully delete pet' })
+      } else {
+        throw { message: 'Pet is not found', status: 404 }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+} 
+
+module.exports = PetController

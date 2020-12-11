@@ -12,10 +12,3 @@ const db = client.db('adopt-us')
 module.exports = {
   db
 }
-
-
-
-
-
-
-
