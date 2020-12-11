@@ -25,10 +25,12 @@ let user;
 
 beforeAll(async () => {
   const users = db.collection('Users')
-  user = await users.insertOne(user_data)
-  const pets = db.collection('Pets')
-  pet =  await pets.insertOne({ ...newPet, user_id: ObjectID(user._id)})
+  const { ops } = await users.insertOne(user_data)
+  user = ops[0]
 
+  const pets = db.collection('Pets')
+  const { ops: petData } =  await pets.insertOne({ ...newPet, user_id: ObjectID(user._id)})
+  pet = petData[0]
   access_token = signToken(user_data)
 })
 
@@ -52,21 +54,62 @@ describe('get pet lists', () => {
   })
 })
 
-describe('add new pet tests', () => {
-  it('add pet success', (done) => {
+describe('get pet details', () => {
+  it('get details success', (done) => {
     request(app)
-      .post('/pets')
-      .set('access_token', access_token)
-      .send(newPet)
+      .get(`/pets/${pet._id}`)
       .then((res) => {
         const { body, status } = res
-
-        expect(status).toEqual(201)
         expect(body).toHaveProperty('name', 'Kora')
         expect(body).toHaveProperty('breed', 'Alaskan Mullet')
         expect(body).toHaveProperty('age', 'baby')
         expect(body).toHaveProperty('gender', 'male')
         expect(body).toHaveProperty('color', 'white')
+        expect(body).toHaveProperty('type', 'dog')
+        expect(body).toHaveProperty('status', false)
+        expect(status).toEqual(200)
+        done()
+      })
+      .catch(done)
+  })
+  it('get details (id not found)', (done) => {
+    request(app)
+      .get(`/pets/5fd08ff84860bd089c5c5369`)
+      .then((res) => {
+        const { body, status } = res
+        expect(status).toEqual(404)
+        expect(body).toHaveProperty('message', 'Pet is not found')
+        done()
+      })
+      .catch(done)
+  })
+})
+
+describe('add new pet tests', () => {
+  it('add pet success', (done) => {
+    request(app)
+      .post('/pets')
+      .set('access_token', access_token)
+      .send({
+        name: 'Bumi',
+        breed: 'Pitbull',
+        age: 'young',
+        gender: 'female',
+        color: 'grey',
+        type: 'dog',
+        status: false
+      })
+      .then((res) => {
+        const { body, status } = res
+
+        expect(status).toEqual(201)
+        expect(body).toHaveProperty('name', 'Bumi')
+        expect(body).toHaveProperty('breed', 'Pitbull')
+        expect(body).toHaveProperty('age', 'young')
+        expect(body).toHaveProperty('gender', 'female')
+        expect(body).toHaveProperty('color', 'grey')
+        expect(body).toHaveProperty('type', 'dog')
+        expect(body).toHaveProperty('status', false)
 
         done()
       })
@@ -159,6 +202,45 @@ describe('update pet tests', () => {
       done()
     })
     .catch(done)
+  })
+})
+
+describe('adopt pet tests', () => {
+  it('adopt successfull', (done) => {
+    request(app)
+      .patch(`/pets/${pet._id}`)
+      .set('access_token', access_token)
+      .then((res) => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toHaveProperty('message', 'Adoption Successfull')
+        done()
+      })
+      .catch(done)
+  })
+  it('adopt failed (pet not found)', (done) => {
+    request(app)
+      .patch('/pets/5fd08ff84860bd089c5c5369')
+      .set('access_token', access_token)
+      .then((res) => {
+        const { status, body } = res
+        expect(status).toEqual(404)
+        expect(body).toHaveProperty('message', 'Pet is not found')
+        done()
+      })
+      .catch(done)
+  })
+  it('adopt failed (not logged in)', (done) => {
+    request(app)
+      .patch(`/pets/${pet._id}`)
+      .set('acess_token', '')
+      .then((res) => {
+        const { body, status } = res
+        expect(status).toEqual(401)
+        expect(body).toHaveProperty('message', 'Authentication Failed')
+        done()
+      })
+      .catch(done)
   })
 })
 

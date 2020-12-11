@@ -39,6 +39,8 @@ class PetController {
         age: req.body.age,
         gender: req.body.gender,
         color: req.body.color,
+        type: req.body.type,
+        status: req.body.status,
         user_id: ObjectID(user._id)
       }
       const result = await pets.insertOne(payload)
@@ -62,6 +64,8 @@ class PetController {
         age: req.body.age,
         gender: req.body.gender,
         color: req.body.color,
+        type: req.body.type,
+        status: req.body.status,
         user_id: ObjectID(user._id)
       }
       const result = await pets.findOneAndUpdate({
@@ -75,6 +79,26 @@ class PetController {
         res.status(200).json(result.value)
       } else {
         throw { message: 'Update failed', status: 400 }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async adoptPet (req, res, next) {
+    try {
+      const id = req.params.id
+      const result = await pets.findOneAndUpdate({
+        "_id": ObjectID(id)
+      }, {
+        $set: { status: true }
+      }, {
+        returnOriginal: false
+      })
+      if (result.value) {
+        res.status(200).json({ message: 'Adoption Successfull' })
+      } else {
+        throw { message: 'Adoption failed', status: 400 }
       }
     } catch (error) {
       next(error)
