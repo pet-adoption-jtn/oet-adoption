@@ -6,8 +6,23 @@ const pets = db.collection('Pets')
 class PetController {
   static async readAll (req, res, next) {
     try {
-      const petlist = await pets.find({}).toArray()
-      res.status(200).json(petlist)
+      const petlist = await pets.aggregate([
+        {
+          $lookup: {
+            from: 'Users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'Owner'
+          }
+        },
+        {
+          $unwind: {
+            path: '$Owner'
+          }
+        }
+      ])
+      const list = await petlist.toArray()
+      res.status(200).json(list)
 
     } catch (error) {
       next(error)
@@ -17,11 +32,29 @@ class PetController {
   static async getOnePet (req, res, next) {
     try {
       const id = req.params.id
-      const pet = await pets.findOne({
-        "_id": ObjectID(id)
-      })
+      const pet = await pets.aggregate([
+        {
+          $match: {
+            _id: ObjectID(id)
+          }
+        },
+        {
+          $lookup: {
+            from: 'Users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'Owner'
+          }
+        },
+        {
+          $unwind: {
+            path: '$Owner'
+          }
+        }
+      ])
       if (pet) {
-        res.status(200).json(pet)
+        const detail = await pet.toArray()
+        res.status(200).json(detail[0])
       } else {
         throw { status: 404, message: 'Pet is not found' }
       }
@@ -39,6 +72,8 @@ class PetController {
         age: req.body.age,
         gender: req.body.gender,
         color: req.body.color,
+        type: req.body.type,
+        status: req.body.status,
         user_id: ObjectID(user._id)
       }
       const result = await pets.insertOne(payload)
@@ -62,6 +97,8 @@ class PetController {
         age: req.body.age,
         gender: req.body.gender,
         color: req.body.color,
+        type: req.body.type,
+        status: req.body.status,
         user_id: ObjectID(user._id)
       }
       const result = await pets.findOneAndUpdate({
@@ -75,6 +112,26 @@ class PetController {
         res.status(200).json(result.value)
       } else {
         throw { message: 'Update failed', status: 400 }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async adoptPet (req, res, next) {
+    try {
+      const id = req.params.id
+      const result = await pets.findOneAndUpdate({
+        "_id": ObjectID(id)
+      }, {
+        $set: { status: true }
+      }, {
+        returnOriginal: false
+      })
+      if (result.value) {
+        res.status(200).json({ message: 'Adoption Successfull' })
+      } else {
+        throw { message: 'Adoption failed', status: 400 }
       }
     } catch (error) {
       next(error)
