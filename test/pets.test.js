@@ -4,12 +4,15 @@ const { ObjectID } = require('mongodb')
 const { db } = require('../config/mongo')
 const request = require('supertest');
 const app = require('../app');
-const { hashPassword } = require('../helpers/bcrypt');
 
 let access_token = ''
 const newPet = {
   name: 'Kora',
-  breed: 'Alaskan Mullet',
+  breed: 'Alaskan Malamute',
+  pictures: [
+    'https://upload.wikimedia.org/wikipedia/commons/9/9f/Alaskan_Malamute.jpg',
+    'https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/14141551/Alaskan-Malamute-puppies.jpg'
+  ],
   age: 'baby',
   gender: 'male',
   color: 'white',
@@ -64,12 +67,13 @@ describe('get pet details', () => {
       .then((res) => {
         const { body, status } = res
         expect(body).toHaveProperty('name', 'Kora')
-        expect(body).toHaveProperty('breed', 'Alaskan Mullet')
+        expect(body).toHaveProperty('breed', 'Alaskan Malamute')
         expect(body).toHaveProperty('age', 'baby')
         expect(body).toHaveProperty('gender', 'male')
         expect(body).toHaveProperty('color', 'white')
         expect(body).toHaveProperty('type', 'dog')
         expect(body).toHaveProperty('status', false)
+        expect(body).toHaveProperty('pictures', expect.any(Array))
         expect(status).toEqual(200)
         done()
       })
@@ -100,6 +104,9 @@ describe('add new pet tests', () => {
         gender: 'female',
         color: 'grey',
         type: 'dog',
+        pictures: [
+          'https://images.solopos.com/2013/06/american-pitbull-terrier-dogs-by-all-puppies.com_-1200x1385.jpg'
+        ],
         status: false
       })
       .then((res) => {
@@ -113,6 +120,7 @@ describe('add new pet tests', () => {
         expect(body).toHaveProperty('color', 'grey')
         expect(body).toHaveProperty('type', 'dog')
         expect(body).toHaveProperty('status', false)
+        expect(body).toHaveProperty('pictures', expect.any(Array))
 
         done()
       })
@@ -159,7 +167,7 @@ describe('update pet tests', () => {
 
       expect(status).toEqual(200)
       expect(body).toHaveProperty('name', 'updated')
-      expect(body).toHaveProperty('breed', 'Alaskan Mullet')
+      expect(body).toHaveProperty('breed', 'Alaskan Malamute')
       expect(body).toHaveProperty('age', 'adult')
       expect(body).toHaveProperty('gender', 'male')
       expect(body).toHaveProperty('color', 'white')

@@ -72,6 +72,7 @@ class PetController {
         color: req.body.color,
         type: req.body.type,
         status: req.body.status,
+        pictures: req.body.pictures,
         user_id: ObjectID(user._id)
       }
       const result = await pets.insertOne(payload)

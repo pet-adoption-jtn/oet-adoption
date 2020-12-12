@@ -12,6 +12,8 @@ let connection;
 let FavPets;
 let CollUser;
 let UserLogin;
+let InsertPet;
+let CollPet;
 const user_data = {
   email: 'example@mail.com',
   password: hashPassword('123456'),
@@ -27,9 +29,24 @@ beforeAll(async () => {
   db = await connection.db('adopt-us')
   FavPets = db.collection('Favorites')
   CollUser = db.collection('Users')
+  CollPet = db.collection('Pets')
   UserLogin = await CollUser.insertOne(user_data)
+  InsertPet = await CollPet.insertOne({
+    name: 'Kora',
+    breed: 'Alaskan Malamute',
+    age: 'baby',
+    gender: 'male',
+    color: 'white',
+    type: 'dog',
+    status: false,
+    pictures: [
+      'https://upload.wikimedia.org/wikipedia/commons/9/9f/Alaskan_Malamute.jpg',
+      'https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/14141551/Alaskan-Malamute-puppies.jpg'
+    ],
+    user_id: ObjectID(UserLogin.ops[0]._id)
+  })
   newDataPet = await FavPets.insertOne({
-    pet_id: ObjectID() ,
+    pet_id: ObjectID(InsertPet.ops[0]._id),
     user_id: ObjectID(UserLogin.ops[0]._id)
   })
   access_token = signToken(user_data)
@@ -38,13 +55,14 @@ beforeAll(async () => {
 afterAll(async () => {
   access_token = ''
   await FavPets.deleteMany({})
+  await CollPet.deleteMany({})
   await CollUser.deleteMany({})
 })
 
 describe('add Favorites pet test', () => {
   it('add favorites pet success', (done) => {
     const newPet = {
-      pet_id: newDataPet.ops[0]._id
+      pet_id: InsertPet.ops[0]._id
     }
     request(app)
       .post('/favorites')
