@@ -3,7 +3,8 @@ const { signToken } = require('../helpers/jwt')
 const { ObjectID } = require('mongodb')
 const { db } = require('../config/mongo')
 const request = require('supertest');
-const app = require('../app')
+const app = require('../app');
+const { hashPassword } = require('../helpers/bcrypt');
 
 let access_token = ''
 const newPet = {
@@ -17,9 +18,11 @@ const newPet = {
 }
 let pet;
 const user_data = {
-  username: 'john doe',
-  email: 'john@mail.com',
-  password: 'asdasdasd'
+  email: 'example@mail.com',
+  password: hashPassword('123456'),
+  phone: '081905056936',
+  address: 'jakarta',
+  username: 'examspl'
 }
 let user;
 

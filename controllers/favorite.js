@@ -5,11 +5,14 @@ class FavoritesPetController {
 
   static async postFavorite(req, res, next) {
     try {
-      const dataBody = req.body
-      if(!dataBody.name) {
+      const { pet_id } = req.body
+      if(!pet_id) {
         throw { message: 'Empty Data' , status: 400 }
       } else {
-        const newFavData = await FavPetColl.insertOne(dataBody)
+        const newFavData = await FavPetColl.insertOne({
+          pet_id: ObjectID(pet_id),
+          user_id: ObjectID(req.userLoggedIn._id)
+        })
         res.status(200).json(newFavData.ops[0])
       }
     } catch (err) {
@@ -19,7 +22,39 @@ class FavoritesPetController {
 
   static async getAllFavorite(req, res, next) {
     try {
-      const allDataFav = await FavPetColl.find().toArray()
+      const allDataFav = await FavPetColl.aggregate([
+        {
+          $lookup: {
+            from: 'Users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'User'
+          }
+        },
+        {
+          $lookup: {
+            from: 'Pets',
+            localField: 'pet_id',
+            foreignField: '_id',
+            as: 'Pet'
+          }
+        },
+        {
+          $unwind: {
+            path: '$User'
+          }
+        },
+        {
+          $unwind: {
+            path: '$Pet'
+          }
+        },
+        {
+          $match: {
+            user_id: ObjectID(req.userLoggedIn._id)
+          }
+        }
+      ]).toArray()
       res.status(200).json(allDataFav)
     } catch (err) {
       next(err)

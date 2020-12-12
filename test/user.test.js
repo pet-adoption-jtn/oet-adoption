@@ -2,6 +2,7 @@ const app = require('../app');
 const request = require('supertest');
 const { MongoClient } = require('mongodb');
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals');
+const { hashPassword } = require('../helpers/bcrypt')
 
 describe('TEST ENDPOINT /register', () => {
 
@@ -185,8 +186,17 @@ describe('TEST ENDPOINT /login', () => {
     connection = await MongoClient.connect('mongodb://localhost:27017', {
       useNewUrlParser: true,
     });
-    db = await connection.db('adopt-us-test');
+    db = await connection.db('adopt-us');
     users = db.collection('Users');
+
+    const user = {
+      email: 'example@mail.com',
+      password: hashPassword('123456'),
+      phone: '081905056936',
+      address: 'jakarta',
+      username: 'examspl'
+    }
+    const insertUser = await users.insertOne(user)
   });
 
   afterAll(async () => {

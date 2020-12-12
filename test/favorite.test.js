@@ -3,6 +3,7 @@ const { signToken } = require('../helpers/jwt')
 const request = require('supertest')
 const { MongoClient, ObjectID } = require('mongodb')
 const app = require('../app')
+const { hashPassword } = require('../helpers/bcrypt')
 
 let access_token = ''
 let newDataPet = {}
@@ -12,17 +13,19 @@ let FavPets;
 let CollUser;
 let UserLogin;
 const user_data = {
-  username: 'user',
-  email: 'user@mail.com',
-  password: '123456'
+  email: 'example@mail.com',
+  password: hashPassword('123456'),
+  phone: '081905056936',
+  address: 'jakarta',
+  username: 'examspl'
 }
 
 beforeAll(async () => {
   connection = await MongoClient.connect('mongodb://localhost:27017', {
     useUnifiedTopology: true
   })
-  db = await connection.db('favorites-test')
-  FavPets = db.collection('favPets-test')
+  db = await connection.db('adopt-us')
+  FavPets = db.collection('Favorites')
   CollUser = db.collection('Users')
   UserLogin = await CollUser.insertOne(user_data)
   newDataPet = await FavPets.insertOne({
@@ -44,11 +47,7 @@ afterAll(async () => {
 describe('add Favorites pet test', () => {
   it('add favorites pet success', (done) => {
     const newPet = {
-      name: 'jon',
-      breed: 'wolf',
-      age: 'baby',
-      gender: 'male',
-      color: 'black'
+      pet_id: newDataPet.ops[0]._id
     }
     request(app)
       .post('/favorites')
@@ -58,11 +57,8 @@ describe('add Favorites pet test', () => {
         const { body, status } = res
 
         expect(status).toEqual(200)
-        expect(body).toHaveProperty('name', 'jon')
-        expect(body).toHaveProperty('breed', 'wolf')
-        expect(body).toHaveProperty('age', 'baby')
-        expect(body).toHaveProperty('gender', 'male')
-        expect(body).toHaveProperty('color', 'black')
+        expect(body).toHaveProperty('pet_id', expect.any(String))
+        expect(body).toHaveProperty('user_id', expect.any(String))
 
         done()
       })
@@ -99,7 +95,6 @@ describe('add Favorites pet test', () => {
         const { body, status } = res
         expect(status).toEqual(400)
         expect(body).toHaveProperty('message', 'Empty Data')
-        console.log( body, '<<<< BODY', status, '<<<< STATUS')
         done()
       })
       .catch(done)
