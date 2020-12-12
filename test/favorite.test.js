@@ -25,6 +25,7 @@ beforeAll(async () => {
   FavPets = db.collection('favPets-test')
   CollUser = db.collection('Users')
   UserLogin = await CollUser.insertOne(user_data)
+  console.log(UserLogin.ops[0]._id, '<<<<<<<<<<<< user log in')
   newDataPet = await FavPets.insertOne({
     name: 'kenedi',
     breed: 'wolf',
@@ -32,6 +33,7 @@ beforeAll(async () => {
     gender: 'male',
     color: 'black'
   })
+  console.log(newDataPet.ops[0]._id, '<<<<<<<<< new data pet')
   access_token = signToken(user_data)
 })
 
