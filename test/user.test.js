@@ -1,6 +1,6 @@
 const app = require('../app');
 const request = require('supertest');
-const { MongoClient, ObjectID } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals');
 
 describe('TEST ENDPOINT /register', () => {
@@ -12,7 +12,7 @@ describe('TEST ENDPOINT /register', () => {
     connection = await MongoClient.connect('mongodb://localhost:27017', {
       useNewUrlParser: true,
     });
-    db = await connection.db('adopt-us-test');
+    db = await connection.db('adopt-us');
     users = db.collection('Users');
   }); 
   

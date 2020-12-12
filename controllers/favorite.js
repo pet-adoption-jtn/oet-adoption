@@ -1,6 +1,5 @@
 const { db, ObjectID } = require('../config/mongo')
-// const FavPetColl = db.collection('Favorites')
-const FavPetColl = db.collection('favPets-test')
+const FavPetColl = db.collection('Favorites')
 
 class FavoritesPetController {
 

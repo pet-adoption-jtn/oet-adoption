@@ -20,9 +20,8 @@ class PetController {
             path: '$Owner'
           }
         }
-      ])
-      const list = await petlist.toArray()
-      res.status(200).json(list)
+      ]).toArray()
+      res.status(200).json(petlist)
 
     } catch (error) {
       next(error)
@@ -51,10 +50,9 @@ class PetController {
             path: '$Owner'
           }
         }
-      ])
-      if (pet) {
-        const detail = await pet.toArray()
-        res.status(200).json(detail[0])
+      ]).toArray()
+      if (pet.length > 0) {
+        res.status(200).json(pet[0])
       } else {
         throw { status: 404, message: 'Pet is not found' }
       }
