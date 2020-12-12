@@ -3,7 +3,8 @@ const { signToken } = require('../helpers/jwt')
 const { ObjectID } = require('mongodb')
 const { db } = require('../config/mongo')
 const request = require('supertest');
-const app = require('../app')
+const app = require('../app');
+const { hashPassword } = require('../helpers/bcrypt');
 
 let access_token = ''
 const newPet = {
