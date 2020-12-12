@@ -19,7 +19,9 @@ let pet;
 const user_data = {
   username: 'john doe',
   email: 'john@mail.com',
-  password: 'asdasdasd'
+  password: 'asdasdasd',
+  address: 'jakarta',
+  phone: '081806463153'
 }
 let user;
 

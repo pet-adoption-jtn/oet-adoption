@@ -21,8 +21,8 @@ beforeAll(async () => {
   connection = await MongoClient.connect('mongodb://localhost:27017', {
     useUnifiedTopology: true
   })
-  db = await connection.db('favorites-test')
-  FavPets = db.collection('favPets-test')
+  db = await connection.db('adopt-us')
+  FavPets = db.collection('Favorites')
   CollUser = db.collection('Users')
   UserLogin = await CollUser.insertOne(user_data)
   newDataPet = await FavPets.insertOne({
