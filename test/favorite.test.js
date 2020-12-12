@@ -1,9 +1,9 @@
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals')
 const { signToken } = require('../helpers/jwt')
-const request = require('supertest')
 const { MongoClient, ObjectID } = require('mongodb')
-const app = require('../app')
 const { hashPassword } = require('../helpers/bcrypt')
+const request = require('supertest')
+const app = require('../app')
 
 let access_token = ''
 let newDataPet = {}
@@ -33,12 +33,16 @@ beforeAll(async () => {
   UserLogin = await CollUser.insertOne(user_data)
   InsertPet = await CollPet.insertOne({
     name: 'Kora',
-    breed: 'Alaskan Mullet',
+    breed: 'Alaskan Malamute',
     age: 'baby',
     gender: 'male',
     color: 'white',
     type: 'dog',
     status: false,
+    pictures: [
+      'https://upload.wikimedia.org/wikipedia/commons/9/9f/Alaskan_Malamute.jpg',
+      'https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/14141551/Alaskan-Malamute-puppies.jpg'
+    ],
     user_id: ObjectID(UserLogin.ops[0]._id)
   })
   newDataPet = await FavPets.insertOne({
@@ -49,8 +53,9 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  access_token = null
+  access_token = ''
   await FavPets.deleteMany({})
+  await CollPet.deleteMany({})
   await CollUser.deleteMany({})
 })
 

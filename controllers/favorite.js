@@ -25,14 +25,6 @@ class FavoritesPetController {
       const allDataFav = await FavPetColl.aggregate([
         {
           $lookup: {
-            from: 'Users',
-            localField: 'user_id',
-            foreignField: '_id',
-            as: 'User'
-          }
-        },
-        {
-          $lookup: {
             from: 'Pets',
             localField: 'pet_id',
             foreignField: '_id',
