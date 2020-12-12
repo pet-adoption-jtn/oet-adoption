@@ -12,6 +12,8 @@ let connection;
 let FavPets;
 let CollUser;
 let UserLogin;
+let InsertPet;
+let CollPet;
 const user_data = {
   email: 'example@mail.com',
   password: hashPassword('123456'),
@@ -27,13 +29,21 @@ beforeAll(async () => {
   db = await connection.db('adopt-us')
   FavPets = db.collection('Favorites')
   CollUser = db.collection('Users')
+  CollPet = db.collection('Pets')
   UserLogin = await CollUser.insertOne(user_data)
-  newDataPet = await FavPets.insertOne({
-    name: 'kenedi',
-    breed: 'wolf',
+  InsertPet = await CollPet.insertOne({
+    name: 'Kora',
+    breed: 'Alaskan Mullet',
     age: 'baby',
     gender: 'male',
-    color: 'black'
+    color: 'white',
+    type: 'dog',
+    status: false,
+    user_id: ObjectID(UserLogin.ops[0]._id)
+  })
+  newDataPet = await FavPets.insertOne({
+    pet_id: ObjectID(InsertPet.ops[0]._id),
+    user_id: ObjectID(UserLogin.ops[0]._id)
   })
   access_token = signToken(user_data)
 })
@@ -47,7 +57,7 @@ afterAll(async () => {
 describe('add Favorites pet test', () => {
   it('add favorites pet success', (done) => {
     const newPet = {
-      pet_id: newDataPet.ops[0]._id
+      pet_id: InsertPet.ops[0]._id
     }
     request(app)
       .post('/favorites')
