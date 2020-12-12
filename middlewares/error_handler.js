@@ -5,6 +5,6 @@ module.exports = function error_handler (err, req, res, next) {
     status = 401
     message = 'Validation Error'
   }
-  console.log(err);
+  console.log(err, '<<<<< Error Handler');
   res.status(status).json({ message })
 }
