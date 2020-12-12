@@ -1,7 +1,8 @@
 const { db } = require('../config/mongo');
-const users = db.collection('Users');
 const { compare, hashPassword } = require('../helpers/bcrypt');
 const { signToken } = require('../helpers/jwt');
+
+const users = db.collection('Users');
 
 class UserController {
   static async register(req, res, next) {

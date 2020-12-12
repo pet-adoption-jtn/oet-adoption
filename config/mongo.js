@@ -7,17 +7,9 @@ const client = new MongoClient(uri, { useUnifiedTopology: true })
 const connect = async () => await client.connect()
 connect()
 
-// const db = client.db('adopt-us')
-const db = client.db('favorites-test')
+const db = client.db('adopt-us')
 
 module.exports = {
   db,
   ObjectID
 }
-
-
-
-
-
-
-
