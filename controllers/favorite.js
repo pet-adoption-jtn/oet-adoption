@@ -33,11 +33,6 @@ class FavoritesPetController {
         },
         {
           $unwind: {
-            path: '$User'
-          }
-        },
-        {
-          $unwind: {
             path: '$Pet'
           }
         },

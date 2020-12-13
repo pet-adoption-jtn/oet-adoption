@@ -92,6 +92,32 @@ describe('get pet details', () => {
   })
 })
 
+
+describe('get pets filtered by type', () => {
+  it('filtered success', (done) => {
+    request(app)
+      .get('/pets/filter/dog')
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toStrictEqual(expect.any(Array))
+        done()
+      })
+      .catch(done)
+  })
+  it('filter failed, (type not found)', (done) => {
+    request(app)
+      .get('/pets/filter/snake')
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(404)
+        expect(body).toHaveProperty('message', 'Type not found')
+        done()
+      })
+      .catch(done)
+  })
+})
+
 describe('add new pet tests', () => {
   it('add pet success', (done) => {
     request(app)

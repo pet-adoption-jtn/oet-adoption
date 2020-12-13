@@ -61,6 +61,24 @@ class PetController {
     }
   }
 
+  static async filterType (req, res, next) {
+    try {
+      const type = req.params.type
+      
+      if (type === 'dog' || type === 'cat') {
+        const filtered_type = await pets.find({
+          type
+        }).toArray()
+
+        res.status(200).json(filtered_type)
+      } else {
+        throw { message: 'Type not found', status: 404 }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
   static async addPet (req, res, next) {
     try {
       const user = req.userLoggedIn

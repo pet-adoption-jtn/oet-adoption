@@ -4,6 +4,7 @@ const Auth = require('../middlewares/auth')
 
 route.get('/', PetController.readAll)
 route.get('/:id', PetController.getOnePet)
+route.get('/filter/:type', PetController.filterType)
 
 route.use(Auth.authentication)
 route.post('/', PetController.addPet)
