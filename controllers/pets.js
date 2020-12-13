@@ -1,5 +1,6 @@
 const { db } = require('../config/mongo')
 const { ObjectID } = require('mongodb')
+const sendMail = require('../helpers/nodemailer')
 
 const pets = db.collection('Pets')
 
@@ -61,6 +62,24 @@ class PetController {
     }
   }
 
+  static async filterType (req, res, next) {
+    try {
+      const type = req.params.type
+      
+      if (type === 'dog' || type === 'cat') {
+        const filtered_type = await pets.find({
+          type
+        }).toArray()
+
+        res.status(200).json(filtered_type)
+      } else {
+        throw { message: 'Type not found', status: 404 }
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
   static async addPet (req, res, next) {
     try {
       const user = req.userLoggedIn
@@ -71,7 +90,8 @@ class PetController {
         gender: req.body.gender,
         color: req.body.color,
         type: req.body.type,
-        status: req.body.status,
+        status: false,
+        request: false,
         pictures: req.body.pictures,
         user_id: ObjectID(user._id)
       }
@@ -86,19 +106,46 @@ class PetController {
     }
   }
 
+  static async sendFormToOwner(req, res, next) {
+    try {
+      const { form_data, pet_detail } = req.body
+      const response = sendMail({
+        recipient: pet_detail.Owner.email,
+        subject: 'Someone wants to adopt your pet',
+        message: 'html ntar'
+      })
+      if (response) {
+        
+      } else {
+        
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async getPetByOwner(req, res, next) {
+    try {
+      const user_id = req.userLoggedIn._id
+      const pet_owned = await pets.find({
+        user_id: ObjectID(user_id)
+      }).toArray()
+      res.status(200).json(pet_owned)
+    } catch (error) {
+      next(error)
+    }
+  }
+
   static async updatePet(req, res, next) {
     try {
       const id = req.params.id
-      const user = req.userLoggedIn
       const payload = { 
         name: req.body.name,
         breed: req.body.breed,
         age: req.body.age,
         gender: req.body.gender,
         color: req.body.color,
-        type: req.body.type,
-        status: req.body.status,
-        user_id: ObjectID(user._id)
+        type: req.body.type
       }
       const result = await pets.findOneAndUpdate({
         "_id": ObjectID(id)
@@ -127,7 +174,7 @@ class PetController {
       }, {
         returnOriginal: false
       })
-      if (result.value) {
+      if (result.value.status === true) {
         res.status(200).json({ message: 'Adoption Successfull' })
       } else {
         throw { message: 'Adoption failed', status: 400 }

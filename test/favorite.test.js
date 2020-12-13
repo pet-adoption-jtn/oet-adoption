@@ -39,6 +39,7 @@ beforeAll(async () => {
     color: 'white',
     type: 'dog',
     status: false,
+    request: false,
     pictures: [
       'https://upload.wikimedia.org/wikipedia/commons/9/9f/Alaskan_Malamute.jpg',
       'https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/14141551/Alaskan-Malamute-puppies.jpg'

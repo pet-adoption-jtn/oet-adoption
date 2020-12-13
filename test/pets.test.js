@@ -17,7 +17,8 @@ const newPet = {
   gender: 'male',
   color: 'white',
   type: 'dog',
-  status: false
+  status: false,
+  request: false
 }
 let pet;
 const user_data = {
@@ -63,7 +64,7 @@ describe('get pet lists', () => {
 describe('get pet details', () => {
   it('get details success', (done) => {
     request(app)
-      .get(`/pets/${pet._id}`)
+      .get(`/pets/detail/${pet._id}`)
       .then((res) => {
         const { body, status } = res
         expect(body).toHaveProperty('name', 'Kora')
@@ -73,6 +74,7 @@ describe('get pet details', () => {
         expect(body).toHaveProperty('color', 'white')
         expect(body).toHaveProperty('type', 'dog')
         expect(body).toHaveProperty('status', false)
+        expect(body).toHaveProperty('request', false)
         expect(body).toHaveProperty('pictures', expect.any(Array))
         expect(status).toEqual(200)
         done()
@@ -81,11 +83,63 @@ describe('get pet details', () => {
   })
   it('get details (id not found)', (done) => {
     request(app)
-      .get(`/pets/5fd08ff84860bd089c5c5369`)
+      .get(`/pets/detail/5fd08ff84860bd089c5c5369`)
       .then((res) => {
         const { body, status } = res
         expect(status).toEqual(404)
         expect(body).toHaveProperty('message', 'Pet is not found')
+        done()
+      })
+      .catch(done)
+  })
+})
+
+describe('get pets by owner', () => {
+  it('get by owner success', (done) => {
+    request(app)
+      .get('/pets/owner')
+      .set('access_token', access_token)
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toStrictEqual(expect.any(Array))
+        done()
+      })
+      .catch(done)
+  })
+  it('failed response (no access_token)', (done) => {
+    request(app)
+      .get('/pets/owner')
+      .then(res => {
+        const {status, body} = res
+        expect(body).toHaveProperty('message', 'Authentication Failed')
+        expect(status).toEqual(401)
+        done()
+      })
+      .catch(done)
+  })
+})
+
+
+describe('get pets filtered by type', () => {
+  it('filtered success', (done) => {
+    request(app)
+      .get('/pets/filter/dog')
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toStrictEqual(expect.any(Array))
+        done()
+      })
+      .catch(done)
+  })
+  it('filter failed, (type not found)', (done) => {
+    request(app)
+      .get('/pets/filter/snake')
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(404)
+        expect(body).toHaveProperty('message', 'Type not found')
         done()
       })
       .catch(done)
@@ -106,8 +160,7 @@ describe('add new pet tests', () => {
         type: 'dog',
         pictures: [
           'https://images.solopos.com/2013/06/american-pitbull-terrier-dogs-by-all-puppies.com_-1200x1385.jpg'
-        ],
-        status: false
+        ]
       })
       .then((res) => {
         const { body, status } = res
@@ -120,6 +173,7 @@ describe('add new pet tests', () => {
         expect(body).toHaveProperty('color', 'grey')
         expect(body).toHaveProperty('type', 'dog')
         expect(body).toHaveProperty('status', false)
+        expect(body).toHaveProperty('request', false)
         expect(body).toHaveProperty('pictures', expect.any(Array))
 
         done()
