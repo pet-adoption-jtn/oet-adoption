@@ -275,6 +275,9 @@ describe('adopt pet tests', () => {
     request(app)
       .patch(`/pets/${pet._id}`)
       .set('access_token', access_token)
+      .send({
+        status: true
+      })
       .then((res) => {
         const { status, body } = res
         expect(status).toEqual(200)
@@ -283,10 +286,28 @@ describe('adopt pet tests', () => {
       })
       .catch(done)
   })
+  it('adopt canceled', (done) => {
+    request(app)
+      .patch(`/pets/${pet._id}`)
+      .set('access_token', access_token)
+      .send({
+        status: false
+      })
+      .then((res) => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toHaveProperty('message', 'Adoption Canceled')
+        done()
+      })
+      .catch(done)
+  })
   it('adopt failed (pet not found)', (done) => {
     request(app)
       .patch('/pets/5fd08ff84860bd089c5c5369')
       .set('access_token', access_token)
+      .send({
+        status: true
+      })
       .then((res) => {
         const { status, body } = res
         expect(status).toEqual(404)

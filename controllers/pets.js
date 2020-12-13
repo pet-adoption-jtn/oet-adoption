@@ -106,18 +106,27 @@ class PetController {
     }
   }
 
-  static async sendFormToOwner(req, res, next) {
+  static async requestAdoption(req, res, next) {
     try {
-      const { form_data, pet_detail } = req.body
-      const response = sendMail({
-        recipient: pet_detail.Owner.email,
-        subject: 'Someone wants to adopt your pet',
-        message: 'html ntar'
+      const { pet_detail, form_data } = req.body
+      const updateRequest = await pets.findOneAndUpdate({
+        "_id": ObjectID(pet_detail._id)
+      }, {
+        $set: {
+          request: true
+        }
+      }, {
+        returnOriginal: false
       })
-      if (response) {
-        
+      if (updateRequest.value) {
+        sendMail({
+          recipient: pet_detail.Owner.email, 
+          subject: `Adoption Request for ${pet_detail.name}`, 
+          message: form_data
+        })
+        res.status(200).json({ message: 'Adoption form delivered to owner' })
       } else {
-        
+        res.status(404).json({ message: 'Pet Not Found' })
       }
     } catch (error) {
       next(error)
@@ -170,14 +179,14 @@ class PetController {
       const result = await pets.findOneAndUpdate({
         "_id": ObjectID(id)
       }, {
-        $set: { status: true }
+        $set: { status: req.body.status }
       }, {
         returnOriginal: false
       })
       if (result.value.status === true) {
         res.status(200).json({ message: 'Adoption Successfull' })
       } else {
-        throw { message: 'Adoption failed', status: 400 }
+        throw { message: 'Adoption Canceled', status: 200 }
       }
     } catch (error) {
       next(error)
