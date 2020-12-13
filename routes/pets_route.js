@@ -3,11 +3,13 @@ const PetController = require('../controllers/pets')
 const Auth = require('../middlewares/auth')
 
 route.get('/', PetController.readAll)
-route.get('/:id', PetController.getOnePet)
+route.get('/detail/:id', PetController.getOnePet)
 route.get('/filter/:type', PetController.filterType)
 
 route.use(Auth.authentication)
+route.get('/owner', PetController.getPetByOwner)
 route.post('/', PetController.addPet)
+route.post('/formadoption', PetController.sendFormToOwner)
 
 route.use('/:id', Auth.authorization)
 route.put('/:id', PetController.updatePet)
