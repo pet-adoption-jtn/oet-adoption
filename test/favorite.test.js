@@ -1,10 +1,9 @@
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals')
 const { signToken } = require('../helpers/jwt')
-const { ObjectID } = require('mongodb')
+const { db, ObjectID } = require('../config/mongo')
 const { hashPassword } = require('../helpers/bcrypt')
 const request = require('supertest')
 const app = require('../app')
-const { db } = require('../config/mongo')
 
 let access_token = ''
 let newDataPet = {}
