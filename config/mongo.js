@@ -7,7 +7,13 @@ const client = new MongoClient(uri, { useUnifiedTopology: true })
 const connect = async () => await client.connect()
 connect()
 
-const db = client.db('adopt-us')
+let db;
+
+if (process.env.NODE_ENV === 'test') {
+  db = client.db('adopt-us-test')
+} else {
+  db = client.db('adopt-us')
+}
 
 module.exports = {
   db,

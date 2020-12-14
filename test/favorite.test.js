@@ -1,14 +1,12 @@
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals')
 const { signToken } = require('../helpers/jwt')
-const { MongoClient, ObjectID } = require('mongodb')
+const { db, ObjectID } = require('../config/mongo')
 const { hashPassword } = require('../helpers/bcrypt')
 const request = require('supertest')
 const app = require('../app')
 
 let access_token = ''
 let newDataPet = {}
-let db;
-let connection;
 let FavPets;
 let CollUser;
 let UserLogin;
@@ -23,10 +21,6 @@ const user_data = {
 }
 
 beforeAll(async () => {
-  connection = await MongoClient.connect('mongodb://localhost:27017', {
-    useUnifiedTopology: true
-  })
-  db = await connection.db('adopt-us')
   FavPets = db.collection('Favorites')
   CollUser = db.collection('Users')
   CollPet = db.collection('Pets')
