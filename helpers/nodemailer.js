@@ -3,8 +3,8 @@ const nodemailer = require('nodemailer')
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'adopt.us@gmail.com',
-    pass: 'pass email'
+    user: 'adopt.us.h8@gmail.com',
+    pass: process.env.GMAIL_PASS
   }
 })
 
@@ -17,15 +17,23 @@ function sendMail (payload) {
     subject: subject,
     html: message
   }
-  let response = ''
+  
   transporter.sendMail(mailOptions, function(err, info) {
     if (err) {
-      response = 'error'
+      console.log(err);
     } else {
-      response = 'success'
+      console.log('success');
     }
   })
-  return response
 }
 
-module.exports = sendMail
+function generateMessage (form_data) {
+  return `
+  ${form_data}
+  `
+}
+
+module.exports = {
+  sendMail,
+  generateMessage
+}
