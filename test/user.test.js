@@ -14,6 +14,7 @@ describe('TEST ENDPOINT /register', () => {
     await connection.close();
   });
     
+  
   it(('testing register is successfull'), async (done) => {
     const newUser = {
       username: 'example',
