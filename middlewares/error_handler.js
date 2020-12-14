@@ -6,7 +6,7 @@ function error_handler (err, req, res, next) {
     status = 401
     message = 'Validation Error'
   }
-  
+  console.log(err);
   res.status(status).json({ message })
 }
 

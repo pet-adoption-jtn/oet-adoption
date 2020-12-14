@@ -124,7 +124,7 @@ class PetController {
           subject: `Adoption Request for ${pet_detail.name}`, 
           message: form_data
         })
-        res.status(200).json({ message: 'Adoption form delivered to owner' })
+        res.status(200).json({ message: 'Adoption form delivered to owner', pet: updateRequest.value })
       } else {
         res.status(404).json({ message: 'Pet Not Found' })
       }
@@ -184,9 +184,9 @@ class PetController {
         returnOriginal: false
       })
       if (result.value.status === true) {
-        res.status(200).json({ message: 'Adoption Successfull' })
+        res.status(200).json({ message: 'Adoption Successfull', data: result.value })
       } else {
-        throw { message: 'Adoption Canceled', status: 200 }
+        throw { message: 'Adoption Canceled', status: 200, data: result.value }
       }
     } catch (error) {
       next(error)

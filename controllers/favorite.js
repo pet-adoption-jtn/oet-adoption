@@ -1,5 +1,6 @@
 const { db, ObjectID } = require('../config/mongo')
 const FavPetColl = db.collection('Favorites')
+const pets_collection = db.collection('Pets')
 
 class FavoritesPetController {
 
@@ -13,7 +14,17 @@ class FavoritesPetController {
           pet_id: ObjectID(pet_id),
           user_id: ObjectID(req.userLoggedIn._id)
         })
-        res.status(200).json(newFavData.ops[0])
+        if (newFavData.insertedCount === 1) {
+          const pet_data = await pets_collection.findOne({
+            _id: ObjectID(pet_id)
+          })
+          res.status(200).json({
+            ...newFavData.ops[0],
+            Pet: pet_data
+          })
+        } else {
+          throw { status: 400, message: 'Failed add to favorites' }
+        }
       }
     } catch (err) {
       next(err)
