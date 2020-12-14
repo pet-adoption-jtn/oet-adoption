@@ -64,7 +64,8 @@ class UserController {
         })
 
         res.status(200).json({
-          access_token: access_token
+          access_token: access_token,
+          account: findUser
         })
       }
     } catch (error) {
