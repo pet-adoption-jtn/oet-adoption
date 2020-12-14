@@ -121,10 +121,10 @@ describe('get pets by owner', () => {
 })
 
 
-describe('get pets filtered by type', () => {
+describe('get pets filtered', () => {
   it('filtered success', (done) => {
     request(app)
-      .get('/pets/filter/dog')
+      .get('/pets/filter/dog/baby/male')
       .then(res => {
         const { status, body } = res
         expect(status).toEqual(200)
@@ -133,13 +133,35 @@ describe('get pets filtered by type', () => {
       })
       .catch(done)
   })
-  it('filter failed, (type not found)', (done) => {
+  it('filter failed, (type only)', (done) => {
     request(app)
-      .get('/pets/filter/snake')
+      .get('/pets/filter/dog/-/-')
       .then(res => {
         const { status, body } = res
-        expect(status).toEqual(404)
-        expect(body).toHaveProperty('message', 'Type not found')
+        expect(status).toEqual(200)
+        expect(body).toStrictEqual(expect.any(Array))
+        done()
+      })
+      .catch(done)
+  })
+  it('filter failed, (age only)', (done) => {
+    request(app)
+      .get('/pets/filter/-/baby/-')
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toStrictEqual(expect.any(Array))
+        done()
+      })
+      .catch(done)
+  })
+  it('filter failed, (gender only)', (done) => {
+    request(app)
+      .get('/pets/filter/-/-/male')
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(200)
+        expect(body).toStrictEqual(expect.any(Array))
         done()
       })
       .catch(done)

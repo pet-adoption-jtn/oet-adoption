@@ -1,6 +1,6 @@
 const { db } = require('../config/mongo')
 const { ObjectID } = require('mongodb')
-const sendMail = require('../helpers/nodemailer')
+const { sendMail, generateMessage } = require('../helpers/nodemailer')
 
 const pets = db.collection('Pets')
 
@@ -62,19 +62,24 @@ class PetController {
     }
   }
 
-  static async filterType (req, res, next) {
+  static async filterPets (req, res, next) {
     try {
-      const type = req.params.type
-      
-      if (type === 'dog' || type === 'cat') {
-        const filtered_type = await pets.find({
-          type
-        }).toArray()
-
-        res.status(200).json(filtered_type)
-      } else {
-        throw { message: 'Type not found', status: 404 }
+      const { type, age, gender, color } = req.params
+      const filterOptions = {}
+      if (type !== '-') {
+        filterOptions.type = type
       }
+      if (age !== '-') {
+        filterOptions.age = age
+      }
+      if (gender !== '-') {
+        filterOptions.gender = gender
+      }
+      if (color !== '-') {
+        filterOptions.color = color
+      }
+      const filteredPets = await pets.find(filterOptions).toArray()
+      res.status(200).json(filteredPets)
     } catch (error) {
       next(error)
     }
@@ -118,11 +123,12 @@ class PetController {
       }, {
         returnOriginal: false
       })
-      if (updateRequest.value) {
+      if (updateRequest.value.name) {
+        const message = generateMessage(form_data)
         sendMail({
           recipient: pet_detail.Owner.email, 
           subject: `Adoption Request for ${pet_detail.name}`, 
-          message: form_data
+          message
         })
         res.status(200).json({ message: 'Adoption form delivered to owner', pet: updateRequest.value })
       } else {
