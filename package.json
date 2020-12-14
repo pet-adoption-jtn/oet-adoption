@@ -4,9 +4,11 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest --forceExit --runInBand --verbose --detectOpenHandles",
+    "test": "NODE_ENV=test jest --forceExit --runInBand --verbose --detectOpenHandles",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "NODE_ENV=development nodemon app.js",
+    "db-test": "node ./config/db-setup.js",
+    "db-dev": "NODE_ENV=development node ./config/db-setup.js"
   },
   "repository": {
     "type": "git",

@@ -1,19 +1,19 @@
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals')
 const { signToken } = require('../helpers/jwt')
-const { MongoClient, ObjectID } = require('mongodb')
+const { ObjectID } = require('mongodb')
 const { hashPassword } = require('../helpers/bcrypt')
 const request = require('supertest')
 const app = require('../app')
+const { db } = require('../config/mongo')
 
 let access_token = ''
 let newDataPet = {}
-let db;
-let connection;
 let FavPets;
 let CollUser;
 let UserLogin;
 let InsertPet;
 let CollPet;
+
 const user_data = {
   email: 'example@mail.com',
   password: hashPassword('123456'),
@@ -23,10 +23,6 @@ const user_data = {
 }
 
 beforeAll(async () => {
-  connection = await MongoClient.connect('mongodb://localhost:27017', {
-    useUnifiedTopology: true
-  })
-  db = await connection.db('adopt-us')
   FavPets = db.collection('Favorites')
   CollUser = db.collection('Users')
   CollPet = db.collection('Pets')

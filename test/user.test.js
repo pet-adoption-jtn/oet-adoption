@@ -1,19 +1,12 @@
 const app = require('../app');
 const request = require('supertest');
-const { MongoClient } = require('mongodb');
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals');
 const { hashPassword } = require('../helpers/bcrypt')
+const { db } = require('../config/mongo');
 
 describe('TEST ENDPOINT /register', () => {
 
-  let connection;
-  let db;
-
   beforeAll(async () => {
-    connection = await MongoClient.connect('mongodb://localhost:27017', {
-      useNewUrlParser: true,
-    });
-    db = await connection.db('adopt-us');
     users = db.collection('Users');
   }); 
   
@@ -179,14 +172,8 @@ describe('TEST ENDPOINT /register', () => {
 });
 
 describe('TEST ENDPOINT /login', () => {
-  let connection;
-  let db;
 
   beforeAll(async () => {
-    connection = await MongoClient.connect('mongodb://localhost:27017', {
-      useNewUrlParser: true,
-    });
-    db = await connection.db('adopt-us');
     users = db.collection('Users');
 
     const user = {
