@@ -1,11 +1,10 @@
 const app = require('../app');
 const request = require('supertest');
+const { db } = require('../config/mongo');
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals');
 const { hashPassword } = require('../helpers/bcrypt')
-const { db } = require('../config/mongo');
 
 describe('TEST ENDPOINT /register', () => {
-
   beforeAll(async () => {
     users = db.collection('Users');
   }); 
@@ -172,7 +171,6 @@ describe('TEST ENDPOINT /register', () => {
 });
 
 describe('TEST ENDPOINT /login', () => {
-
   beforeAll(async () => {
     users = db.collection('Users');
 

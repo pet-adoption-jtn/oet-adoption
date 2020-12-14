@@ -9,7 +9,7 @@ route.get('/filter/:type', PetController.filterType)
 route.use(Auth.authentication)
 route.get('/owner', PetController.getPetByOwner)
 route.post('/', PetController.addPet)
-route.post('/formadoption', PetController.sendFormToOwner)
+route.post('/request_adoption', PetController.requestAdoption)
 
 route.use('/:id', Auth.authorization)
 route.put('/:id', PetController.updatePet)
