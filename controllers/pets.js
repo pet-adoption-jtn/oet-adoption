@@ -64,7 +64,7 @@ class PetController {
 
   static async filterPets (req, res, next) {
     try {
-      const { type, age, gender } = req.params
+      const { type, age, gender, color } = req.params
       const filterOptions = {}
       if (type !== '-') {
         filterOptions.type = type
@@ -74,6 +74,9 @@ class PetController {
       }
       if (gender !== '-') {
         filterOptions.gender = gender
+      }
+      if (color !== '-') {
+        filterOptions.color = color
       }
       const filteredPets = await pets.find(filterOptions).toArray()
       res.status(200).json(filteredPets)
