@@ -76,13 +76,13 @@ class UserController {
 
   static async googleSignIn(req, res, next) {
     try {
-      const client = new OAuth2Client('281372448495-9egpusn6t7nq49euno6bv5ffi9qesq2s.apps.googleusercontent.com');
+      const client = new OAuth2Client(process.env.CLIENT_ID);
       const { googleToken } = req.body
-      const tiket = await client.verifyIdToken({
+      const ticket = await client.verifyIdToken({
         idToken: googleToken,
-        audience: '281372448495-9egpusn6t7nq49euno6bv5ffi9qesq2s.apps.googleusercontent.com'
+        audience: process.env.CLIENT_ID
       })
-      const payload = tiket.getPayload()
+      const payload = ticket.getPayload()
       const userGoogle = await users.findOne({
         email: payload.email
       })
@@ -100,8 +100,8 @@ class UserController {
       } else {
         const { ops } = await users.insertOne({
           email: payload.email,
-          username: payload.name,
-          password: hashPassword('usergoogle'),
+          username: payload.name || payload.email.substring(0, payload.email.indexOf('@')),
+          password: hashPassword(process.env.GOOGLE_PASS),
           address: '-',
           phone: '-'
         })
@@ -117,8 +117,6 @@ class UserController {
           account: ops[0]
         })
       }
-      
-      console.log(tiket.getPayload())
     } catch (err) {
       next(err)
     }
