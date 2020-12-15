@@ -9,7 +9,10 @@ class PetController {
     try {
       const petlist = await pets.aggregate([
         {
-          $match: req.query
+          $match: {
+            ...req.query,
+            status: false
+          }
         },
         {
           $lookup: {
@@ -18,9 +21,6 @@ class PetController {
             foreignField: '_id',
             as: 'Owner'
           },
-        },
-        {
-          $match: req.query
         },
         {
           $unwind: {
