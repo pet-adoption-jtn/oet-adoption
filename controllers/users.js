@@ -1,6 +1,7 @@
 const { db } = require('../config/mongo');
 const { compare, hashPassword } = require('../helpers/bcrypt');
 const { signToken } = require('../helpers/jwt');
+const { OAuth2Client } = require('google-auth-library');
 
 const users = db.collection('Users');
 
@@ -70,6 +71,56 @@ class UserController {
       }
     } catch (error) {
       next(error)
+    }
+  }
+
+  static async googleSignIn(req, res, next) {
+    try {
+      const client = new OAuth2Client('281372448495-9egpusn6t7nq49euno6bv5ffi9qesq2s.apps.googleusercontent.com');
+      const { googleToken } = req.body
+      const tiket = await client.verifyIdToken({
+        idToken: googleToken,
+        audience: '281372448495-9egpusn6t7nq49euno6bv5ffi9qesq2s.apps.googleusercontent.com'
+      })
+      const payload = tiket.getPayload()
+      const userGoogle = await users.findOne({
+        email: payload.email
+      })
+      if(userGoogle) {
+        const access_token = signToken({
+          _id: userGoogle._id,
+          username: userGoogle.username,
+          email: userGoogle.email
+        })
+
+        res.status(200).json({
+          access_token: access_token,
+          account: userGoogle
+        })
+      } else {
+        const { ops } = await users.insertOne({
+          email: payload.email,
+          username: payload.name,
+          password: hashPassword('usergoogle'),
+          address: '-',
+          phone: '-'
+        })
+        
+        const access_token = signToken({
+          _id: ops[0]._id,
+          username: ops[0].username,
+          email: ops[0].email
+        })
+
+        res.status(200).json({
+          access_token: access_token,
+          account: ops[0]
+        })
+      }
+      
+      console.log(tiket.getPayload())
+    } catch (err) {
+      next(err)
     }
   }
 }
