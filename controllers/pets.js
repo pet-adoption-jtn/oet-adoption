@@ -17,7 +17,10 @@ class PetController {
             localField: 'user_id',
             foreignField: '_id',
             as: 'Owner'
-          }
+          },
+        },
+        {
+          $match: req.query
         },
         {
           $unwind: {
