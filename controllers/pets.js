@@ -14,7 +14,10 @@ class PetController {
             localField: 'user_id',
             foreignField: '_id',
             as: 'Owner'
-          }
+          },
+        },
+        {
+          $match: req.query
         },
         {
           $unwind: {
@@ -66,6 +69,8 @@ class PetController {
     try {
       const { type, age, gender, color } = req.params
       const filterOptions = {}
+      
+
       if (type !== '-') {
         filterOptions.type = type
       }
