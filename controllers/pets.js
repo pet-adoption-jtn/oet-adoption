@@ -9,6 +9,9 @@ class PetController {
     try {
       const petlist = await pets.aggregate([
         {
+          $match: req.query
+        },
+        {
           $lookup: {
             from: 'Users',
             localField: 'user_id',
@@ -62,29 +65,6 @@ class PetController {
     }
   }
 
-  static async filterPets (req, res, next) {
-    try {
-      const { type, age, gender, color } = req.params
-      const filterOptions = {}
-      if (type !== '-') {
-        filterOptions.type = type
-      }
-      if (age !== '-') {
-        filterOptions.age = age
-      }
-      if (gender !== '-') {
-        filterOptions.gender = gender
-      }
-      if (color !== '-') {
-        filterOptions.color = color
-      }
-      const filteredPets = await pets.find(filterOptions).toArray()
-      res.status(200).json(filteredPets)
-    } catch (error) {
-      next(error)
-    }
-  }
-
   static async addPet (req, res, next) {
     try {
       const user = req.userLoggedIn
@@ -96,7 +76,7 @@ class PetController {
         color: req.body.color,
         type: req.body.type,
         status: false,
-        request: false,
+        request: [],
         pictures: req.body.pictures,
         user_id: ObjectID(user._id)
       }
@@ -113,12 +93,15 @@ class PetController {
 
   static async requestAdoption(req, res, next) {
     try {
-      const { pet_detail, form_data } = req.body
+      const { pet_detail, form_data, adopter } = req.body
       const updateRequest = await pets.findOneAndUpdate({
         "_id": ObjectID(pet_detail._id)
       }, {
         $set: {
-          request: true
+          request: [
+            ...pet_detail.request,
+            adopter
+          ]
         }
       }, {
         returnOriginal: false
@@ -182,17 +165,36 @@ class PetController {
   static async adoptPet (req, res, next) {
     try {
       const id = req.params.id
+      const { status, adopter } = req.body
+      const payload = {}
+      if (status) {
+        payload.status = status
+        payload.user_id = ObjectID(adopter._id)
+        payload.request = []
+      } else {
+        payload.status = status
+      }
       const result = await pets.findOneAndUpdate({
         "_id": ObjectID(id)
       }, {
-        $set: { status: req.body.status }
+        $set: payload
       }, {
         returnOriginal: false
       })
       if (result.value.status === true) {
+        sendMail({
+          recipient: adopter.email,
+          subject: `Your adoption request for ${result.value.name}`,
+          message: ''
+        })
         res.status(200).json({ message: 'Adoption Successfull', data: result.value })
       } else {
-        throw { message: 'Adoption Canceled', status: 200, data: result.value }
+        sendMail({
+          recipient: adopter.email,
+          subject: `Your adoption request for ${result.value.name}`,
+          message: ''
+        })
+        res.status(200).json({ message: 'Adoption Canceled', data: result.value })
       }
     } catch (error) {
       next(error)

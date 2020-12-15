@@ -12,7 +12,7 @@ function sendMail (payload) {
   const { recipient, subject, message } = payload
   
   const mailOptions = {
-    from: 'adopt.us@gmail.com',
+    from: 'adopt.us.h8@gmail.com',
     to: recipient,
     subject: subject,
     html: message

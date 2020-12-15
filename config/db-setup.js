@@ -89,8 +89,8 @@ async function init () {
               description: 'true for adopted, false for not'
             },
             request: {
-              bsonType: 'bool',
-              description: 'true for requested for adoption, false for not'
+              bsonType: 'array',
+              description: 'if length 0 => theres no request for adoption yet'
             },
             color: {
               bsonType: 'string',
