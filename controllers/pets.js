@@ -1,6 +1,6 @@
 const { db } = require('../config/mongo')
 const { ObjectID } = require('mongodb')
-const { sendMail, generateMessage } = require('../helpers/nodemailer')
+const { sendMail, generateMessage, generateMessageApproval, generateMessageDecline } = require('../helpers/nodemailer')
 
 const pets = db.collection('Pets')
 
@@ -188,14 +188,14 @@ class PetController {
         sendMail({
           recipient: adopter.email,
           subject: `Your adoption request for ${result.value.name}`,
-          message: ''
+          message: generateMessageApproval(result.value)
         })
         res.status(200).json({ message: 'Adoption Successfull', data: result.value })
       } else {
         sendMail({
           recipient: adopter.email,
           subject: `Your adoption request for ${result.value.name}`,
-          message: ''
+          message: generateMessageDecline(result.value)
         })
         res.status(200).json({ message: 'Adoption Canceled', data: result.value })
       }
