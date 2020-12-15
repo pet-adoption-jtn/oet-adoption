@@ -9,8 +9,10 @@ const transporter = nodemailer.createTransport({
 })
 
 function sendMail (payload) {
-  const { recipient, subject, message } = payload
-  
+  let { recipient, subject, message } = payload
+  if (Array.isArray(recipient)) {
+    recipient = recipient.map(person => person.email)
+  }
   const mailOptions = {
     from: 'adopt.us.h8@gmail.com',
     to: recipient,
