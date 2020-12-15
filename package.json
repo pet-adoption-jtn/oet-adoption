@@ -4,11 +4,11 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "set NODE_ENV=test && jest --forceExit --runInBand --verbose --detectOpenHandles",
-    "start": "set NODE_ENV=production && node app.js",
-    "dev": "set NODE_ENV=development && nodemon app.js",
-    "init-test": "set NODE_ENV=test && node ./config/db-setup.js",
-    "init-dev": "set NODE_ENV=development && node ./config/db-setup.js"
+    "test": "NODE_ENV=test jest --forceExit --runInBand --verbose --detectOpenHandles",
+    "start": "NODE_ENV=production node app.js",
+    "dev": "NODE_ENV=development nodemon app.js",
+    "init-test": "NODE_ENV=test node ./config/db-setup.js",
+    "init-dev": "NODE_ENV=development node ./config/db-setup.js"
   },
   "repository": {
     "type": "git",

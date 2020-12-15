@@ -18,7 +18,7 @@ const newPet = {
   color: 'white',
   type: 'dog',
   status: false,
-  request: false
+  request: []
 }
 let pet;
 const user_data = {
@@ -59,6 +59,17 @@ describe('get pet lists', () => {
       })
       .catch(done)
   })
+  it('filter pets by query', (done) => {
+    request(app)
+      .get('/pets?type=dog&age=young')
+      .then((res) => {
+        const { body, status } = res
+        expect(body).toStrictEqual(expect.any(Array))
+        expect(status).toEqual(200)
+        done()
+      })
+      .catch(done)
+  })
 })
 
 describe('get pet details', () => {
@@ -74,7 +85,7 @@ describe('get pet details', () => {
         expect(body).toHaveProperty('color', 'white')
         expect(body).toHaveProperty('type', 'dog')
         expect(body).toHaveProperty('status', false)
-        expect(body).toHaveProperty('request', false)
+        expect(body).toHaveProperty('request', expect.any(Array))
         expect(body).toHaveProperty('pictures', expect.any(Array))
         expect(status).toEqual(200)
         done()
@@ -120,32 +131,6 @@ describe('get pets by owner', () => {
   })
 })
 
-
-describe('get pets filtered by type', () => {
-  it('filtered success', (done) => {
-    request(app)
-      .get('/pets/filter/dog')
-      .then(res => {
-        const { status, body } = res
-        expect(status).toEqual(200)
-        expect(body).toStrictEqual(expect.any(Array))
-        done()
-      })
-      .catch(done)
-  })
-  it('filter failed, (type not found)', (done) => {
-    request(app)
-      .get('/pets/filter/snake')
-      .then(res => {
-        const { status, body } = res
-        expect(status).toEqual(404)
-        expect(body).toHaveProperty('message', 'Type not found')
-        done()
-      })
-      .catch(done)
-  })
-})
-
 describe('add new pet tests', () => {
   it('add pet success', (done) => {
     request(app)
@@ -173,7 +158,7 @@ describe('add new pet tests', () => {
         expect(body).toHaveProperty('color', 'grey')
         expect(body).toHaveProperty('type', 'dog')
         expect(body).toHaveProperty('status', false)
-        expect(body).toHaveProperty('request', false)
+        expect(body).toHaveProperty('request', expect.any(Array))
         expect(body).toHaveProperty('pictures', expect.any(Array))
 
         done()
@@ -276,7 +261,8 @@ describe('adopt pet tests', () => {
       .patch(`/pets/${pet._id}`)
       .set('access_token', access_token)
       .send({
-        status: true
+        status: true,
+        adopter: user_data
       })
       .then((res) => {
         const { status, body } = res
@@ -291,7 +277,8 @@ describe('adopt pet tests', () => {
       .patch(`/pets/${pet._id}`)
       .set('access_token', access_token)
       .send({
-        status: false
+        status: false,
+        adopter: user_data
       })
       .then((res) => {
         const { status, body } = res
@@ -306,7 +293,8 @@ describe('adopt pet tests', () => {
       .patch('/pets/5fd08ff84860bd089c5c5369')
       .set('access_token', access_token)
       .send({
-        status: true
+        status: true,
+        adopter: user_data
       })
       .then((res) => {
         const { status, body } = res
