@@ -9,7 +9,10 @@ class PetController {
     try {
       const petlist = await pets.aggregate([
         {
-          $match: req.query
+          $match: {
+            ...req.query,
+            status: false
+          }
         },
         {
           $lookup: {
@@ -18,9 +21,6 @@ class PetController {
             foreignField: '_id',
             as: 'Owner'
           },
-        },
-        {
-          $match: req.query
         },
         {
           $unwind: {
@@ -168,14 +168,17 @@ class PetController {
   static async adoptPet (req, res, next) {
     try {
       const id = req.params.id
-      const { status, adopter } = req.body
+      const { status, adopter, pet } = req.body
+
       const payload = {}
+
       if (status) {
         payload.status = status
         payload.user_id = ObjectID(adopter._id)
         payload.request = []
       } else {
         payload.status = status
+        payload.request = pet.request.filter(request => request._id.toString() !== adopter._id.toString())
       }
       const result = await pets.findOneAndUpdate({
         "_id": ObjectID(id)
@@ -189,6 +192,11 @@ class PetController {
           recipient: adopter.email,
           subject: `Your adoption request for ${result.value.name}`,
           message: generateMessageApproval(result.value)
+        })
+        sendMail({
+          recipient: pet.request.filter(request => request._id.toString() !== adopter._id.toString()),
+          subject: `Your adoption request for ${result.value.name}`,
+          message: generateMessageDecline(result.value)
         })
         res.status(200).json({ message: 'Adoption Successfull', data: result.value })
       } else {
