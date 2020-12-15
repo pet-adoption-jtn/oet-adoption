@@ -4,8 +4,6 @@ const Auth = require('../middlewares/auth')
 
 route.get('/', PetController.readAll)
 route.get('/detail/:id', PetController.getOnePet)
-route.get('/filter/:type/:age/:gender/:color', PetController.filterPets)
-// /pets?type=dog&age=young
 
 route.use(Auth.authentication)
 route.get('/owner', PetController.getPetByOwner)
