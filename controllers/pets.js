@@ -178,7 +178,7 @@ class PetController {
         payload.request = []
       } else {
         payload.status = status
-        payload.request = pet.request.filter(request => request.id.toString() !== adopter.id.toString())
+        payload.request = pet.request.filter(request => request._id.toString() !== adopter._id.toString())
       }
       const result = await pets.findOneAndUpdate({
         "_id": ObjectID(id)
@@ -192,6 +192,11 @@ class PetController {
           recipient: adopter.email,
           subject: `Your adoption request for ${result.value.name}`,
           message: generateMessageApproval(result.value)
+        })
+        sendMail({
+          recipient: pet.request.filter(request => request._id.toString() !== adopter._id.toString()),
+          subject: `Your adoption request for ${result.value.name}`,
+          message: generateMessageDecline(result.value)
         })
         res.status(200).json({ message: 'Adoption Successfull', data: result.value })
       } else {
