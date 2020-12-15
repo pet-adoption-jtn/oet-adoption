@@ -168,14 +168,17 @@ class PetController {
   static async adoptPet (req, res, next) {
     try {
       const id = req.params.id
-      const { status, adopter } = req.body
+      const { status, adopter, pet } = req.body
+
       const payload = {}
+
       if (status) {
         payload.status = status
         payload.user_id = ObjectID(adopter._id)
         payload.request = []
       } else {
         payload.status = status
+        payload.request = pet.request.filter(request => request.id.toString() !== adopter.id.toString())
       }
       const result = await pets.findOneAndUpdate({
         "_id": ObjectID(id)
