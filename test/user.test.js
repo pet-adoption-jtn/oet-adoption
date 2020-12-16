@@ -2,7 +2,10 @@ const app = require('../app');
 const request = require('supertest');
 const { db } = require('../config/mongo');
 const { afterAll, beforeAll, it, expect, describe } = require('@jest/globals');
-const { hashPassword } = require('../helpers/bcrypt')
+const { hashPassword } = require('../helpers/bcrypt');
+const { signToken } = require('../helpers/jwt');
+
+let access_token = ''
 
 describe('TEST ENDPOINT /register', () => {
   beforeAll(async () => {
@@ -245,5 +248,81 @@ describe('TEST ENDPOINT /login', () => {
         done()
       })
       .catch(done)
+  })
+});
+
+describe('TEST ENDPOINT /edituser', () => {
+  beforeAll(async () => {
+    const users = db.collection('Users')
+
+    const user = {
+      email: 'example@mail.com',
+      password: hashPassword('123456'),
+      phone: '081904041401',
+      address: 'bandung',
+      username: 'exams'
+    }
+    const inserUser = await users.insertOne(user)
+    access_token = signToken(user)
+  });
+
+  afterAll(async () => {
+    await db.collection('Users').deleteMany({ })
+    await connection.close();
+    access_token = ''
+  });
+
+  it(('Edit Successful'), async (done) => {
+    const user = {
+      email: 'example@mail.com',
+      password: hashPassword('123456'),
+      phone: '081904041401',
+      address: 'bandung',
+      username: 'exams'
+    }
+    request(app)
+    .post('/edituser')
+    .send({
+      ...user,
+      username: 'max',
+      address: 'tegal'
+    })
+    .set('access_token', access_token)
+    .then(res => {
+      const { status, body } = res
+
+      expect(status).toEqual(200)
+      expect(body).toHaveProperty('access_token', expect.any(String))
+      expect(body).toHaveProperty('account', expect.any(Object))
+
+      done()
+    })
+    .catch(done)
+  })
+
+  it(('Edit error (auth fail)'), async(done) => {
+    const user = {
+      email: 'example@mail.com',
+      password: hashPassword('123456'),
+      phone: '081904041401',
+      address: 'bandung',
+      username: 'exams'
+    }
+    request(app)
+    .post('/edituser')
+    .send({
+      ...user,
+      username: 'max',
+      address: 'tegal'
+    })
+    .then(res => {
+      const { status, body } = res
+
+      expect(status).toEqual(401)
+      expect(body).toHaveProperty('message', 'Authentication Failed')
+
+      done()
+    })
+    .catch(done)
   })
 })

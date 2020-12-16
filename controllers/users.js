@@ -144,8 +144,6 @@ class UserController {
           access_token,
           account: updatedUser.value
         })
-      } else {
-        throw { status: 404, message: 'user not found' }
       }
     } catch (error) {
       next(error)
