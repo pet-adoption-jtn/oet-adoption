@@ -6,6 +6,8 @@ const request = require('supertest');
 const app = require('../app');
 
 let access_token = ''
+let fake_token = ''
+let token2 = ''
 const newPet = {
   name: 'Kora',
   breed: 'Alaskan Malamute',
@@ -29,11 +31,26 @@ const user_data = {
   phone: '081806463153'
 }
 let user;
+let other_user;
 
 beforeAll(async () => {
   const users = db.collection('Users')
   const { ops } = await users.insertOne(user_data)
+  const { ops: another_user } = await users.insertOne({
+    username: 'account',
+    email: 'account@mail.com',
+    password: 'asdasdasd',
+    address: 'bandung',
+    phone: '081398118877'
+  })
+  other_user = another_user[0]
   user = ops[0]
+  token2 = signToken(another_user[0])
+  fake_token = signToken({
+    id: '2123432',
+    email: 'fake@mail.com',
+    username: 'asdad'
+  })
 
   const pets = db.collection('Pets')
   const { ops: petData } =  await pets.insertOne({ ...newPet, user_id: ObjectID(user._id)})
@@ -131,6 +148,64 @@ describe('get pets by owner', () => {
   })
 })
 
+describe('request adoption test', () => {
+  it('request success', (done) => {
+    request(app)
+      .post('/pets/request_adoption')
+      .set('access_token', access_token)
+      .send({
+        pet_detail: {
+          ...pet,
+          Owner: user_data
+        },
+        form_data: {first_name: 'asdasd'},
+        adopter: user_data
+      })
+      .then(({ status, body }) => {
+        expect(status).toEqual(200)
+        expect(body).toHaveProperty('message', 'Adoption form delivered to owner')
+        expect(body).toHaveProperty('pet', expect.any(Object))
+        done()
+      })
+      .catch(done)
+  })
+  it('request adoption failed (no access_token', (done) => {
+    request(app)
+      .post('/pets/request_adoption')
+      .send({
+        pet_detail: pet,
+        form_data: {first_name: 'asdasd'},
+        adopter: user_data
+      })
+        .then(({ status, body }) => {
+          expect(status).toEqual(401)
+          expect(body).toHaveProperty('message', 'Authentication Failed')
+          done()
+        })
+        .catch(done)
+  })
+  it('request failed, pet not found', (done) => {
+    request(app)
+      .post('/pets/request_adoption')
+      .set('access_token', access_token)
+      .send({
+        pet_detail: {
+          ...pet,
+          _id: "5fd08ff84860bd089c5c5369",
+          Owner: user_data
+        },
+        form_data: {first_name: 'asdasd'},
+        adopter: user_data
+      })
+      .then(({ status, body }) => {
+        expect(status).toEqual(404)
+        expect(body).toHaveProperty('message', 'Pet Not Found')
+        done()
+      })
+      .catch(done)
+  })
+})
+
 describe('add new pet tests', () => {
   it('add pet success', (done) => {
     request(app)
@@ -185,6 +260,18 @@ describe('add new pet tests', () => {
         const { body, status } = res
         expect(status).toEqual(401)
         expect(body).toHaveProperty('message', 'Validation Error')
+        done()
+      })
+      .catch(done)
+  })
+  it('add pet failed, (auth fail, user not in db)', (done) => {
+    request(app)
+      .post('/pets')
+      .set('access_token', fake_token)
+      .send(newPet)
+      .then(({ body, status }) => {
+        expect(body).toHaveProperty('message', 'Authentication Failed')
+        expect(status).toEqual(401)
         done()
       })
       .catch(done)
@@ -252,6 +339,18 @@ describe('update pet tests', () => {
       done()
     })
     .catch(done)
+  })
+  it('update failed (pet doenst belong to user)', (done) => {
+    request(app)
+      .put(`/pets/${pet._id}`)
+      .set('access_token', token2)
+      .send(newPet)
+      .then(({ status, body }) => {
+        expect(status).toEqual(401)
+        expect(body).toHaveProperty('message', 'Not Authorized')
+        done()
+      })
+      .catch(done)
   })
 })
 

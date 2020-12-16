@@ -1,6 +1,11 @@
 const { db } = require('../config/mongo')
 const { ObjectID } = require('mongodb')
-const { sendMail, generateMessage, generateMessageApproval, generateMessageDecline } = require('../helpers/nodemailer')
+const { 
+  sendMail, 
+  generateMessage, 
+  generateMessageApproval, 
+  generateMessageDecline 
+} = require('../helpers/nodemailer')
 
 const pets = db.collection('Pets')
 
@@ -109,7 +114,7 @@ class PetController {
       }, {
         returnOriginal: false
       })
-      if (updateRequest.value.name) {
+      if (updateRequest.value) {
         const message = generateMessage(form_data)
         sendMail({
           recipient: pet_detail.Owner.email, 
@@ -157,8 +162,6 @@ class PetController {
       })
       if (result.value) {
         res.status(200).json(result.value)
-      } else {
-        throw { message: 'Update failed', status: 400 }
       }
     } catch (error) {
       next(error)
@@ -193,11 +196,14 @@ class PetController {
           subject: `Your adoption request for ${result.value.name}`,
           message: generateMessageApproval(result.value)
         })
-        sendMail({
-          recipient: pet.request.filter(request => request._id.toString() !== adopter._id.toString()),
-          subject: `Your adoption request for ${result.value.name}`,
-          message: generateMessageDecline(result.value)
-        })
+        const rejected = pet.request.filter(request => request._id.toString() !== adopter._id.toString())
+        if (rejected.length) {
+          sendMail({
+            recipient: rejected,
+            subject: `Your adoption request for ${result.value.name}`,
+            message: generateMessageDecline(result.value)
+          })
+        }
         res.status(200).json({ message: 'Adoption Successfull', data: result.value })
       } else {
         sendMail({
@@ -220,8 +226,6 @@ class PetController {
       })
       if (result.deletedCount === 1) {
         res.status(200).json({ message: 'Successfully delete pet' })
-      } else {
-        throw { message: 'Pet is not found', status: 404 }
       }
     } catch (error) {
       next(error)

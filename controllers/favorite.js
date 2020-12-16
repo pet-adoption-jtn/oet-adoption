@@ -73,7 +73,7 @@ class FavoritesPetController {
       if( delFavPet.deletedCount === 1) {
         res.status(200).json({ msg: "Successfully deleted one Pet Favorites." })
       } else {
-        res.status(401).json({ msg: "No documents matched the query. Deleted 0 documents." })
+        throw { status: 404, message: "No documents matched the query. Deleted 0 documents." }
       }
     } catch (err) {
       next(err)
