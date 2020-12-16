@@ -1,4 +1,4 @@
-const { db } = require('../config/mongo');
+const { db, ObjectID } = require('../config/mongo');
 const { compare, hashPassword } = require('../helpers/bcrypt');
 const { signToken } = require('../helpers/jwt');
 const { OAuth2Client } = require('google-auth-library');
@@ -13,17 +13,17 @@ class UserController {
       if (username === null || email === null || password === null || address === null || phone === null) {
         throw ({ status: 400, message: 'Please fill all the columns' })
       } else if (password.length < 6) {
-        throw ({status: 400, message: 'Password minimum is six characters'})
+        throw ({status: 400, message: 'Minimum password is six characters'})
       } else if (username.length < 6) {
         throw ({ status: 400, message: 'Minimum username is six characters'})
       } else if (phone.length < 11 && phone !== '') {
-        throw ({ status: 400, message: 'Phone must have minimum eleven characters' })
+        throw ({ status: 400, message: 'Phone must have a minimum of eleven characters' })
       } else if (email === '' || address === '' || phone === '') {
         throw ({ status: 400, message: 'Please fill all the columns' })
       } else {
         const unique = await users.findOne({ email: email})
         if (unique) {
-          throw ({ status: 400, message: 'Email is already exists' })
+          throw ({ status: 400, message: 'Email already exists' })
         } else {
           const response = await users.insertOne({
             username,
@@ -76,13 +76,13 @@ class UserController {
 
   static async googleSignIn(req, res, next) {
     try {
-      const client = new OAuth2Client('281372448495-9egpusn6t7nq49euno6bv5ffi9qesq2s.apps.googleusercontent.com');
+      const client = new OAuth2Client(process.env.CLIENT_ID);
       const { googleToken } = req.body
-      const tiket = await client.verifyIdToken({
+      const ticket = await client.verifyIdToken({
         idToken: googleToken,
-        audience: '281372448495-9egpusn6t7nq49euno6bv5ffi9qesq2s.apps.googleusercontent.com'
+        audience: process.env.CLIENT_ID
       })
-      const payload = tiket.getPayload()
+      const payload = ticket.getPayload()
       const userGoogle = await users.findOne({
         email: payload.email
       })
@@ -100,8 +100,8 @@ class UserController {
       } else {
         const { ops } = await users.insertOne({
           email: payload.email,
-          username: payload.name,
-          password: hashPassword('usergoogle'),
+          username: payload.name || payload.email.substring(0, payload.email.indexOf('@')),
+          password: hashPassword(process.env.GOOGLE_PASS),
           address: '-',
           phone: '-'
         })
@@ -117,9 +117,38 @@ class UserController {
           account: ops[0]
         })
       }
-      
     } catch (err) {
       next(err)
+    }
+  }
+
+  static async editUser (req, res, next) {
+    try {
+      const { username, email, address, phone } =  req.body 
+      const updatedUser = await users.findOneAndUpdate({
+        "_id": ObjectID(req.userLoggedIn._id)
+      }, {
+        $set: {
+          username, email, address, phone
+        }
+      }, {
+        returnOriginal: false
+      })
+      if (updatedUser.value) {
+        const access_token = signToken({
+          id: updatedUser.value._id,
+          username: updatedUser.value.username,
+          email: updatedUser.value.email
+        })
+        res.status(200).json({
+          access_token,
+          account: updatedUser.value
+        })
+      } else {
+        throw { status: 404, message: 'user not found' }
+      }
+    } catch (error) {
+      next(error)
     }
   }
 }

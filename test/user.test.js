@@ -53,7 +53,7 @@ describe('TEST ENDPOINT /register', () => {
       .then(res => {
         const { status, body } = res
         expect(status).toEqual(400)
-        expect(body).toHaveProperty('message', 'Email is already exists')
+        expect(body).toHaveProperty('message', 'Email already exists')
 
         done()
       })
@@ -75,7 +75,7 @@ describe('TEST ENDPOINT /register', () => {
       .then((res) => {
         const { body, status } = res
         expect(status).toEqual(400)
-        expect(body).toHaveProperty('message', 'Password minimum is six characters')
+        expect(body).toHaveProperty('message', 'Minimum password is six characters')
         
         done()
       })
@@ -141,7 +141,7 @@ describe('TEST ENDPOINT /register', () => {
       .then(res  => {
         const { status, body } = res
         expect(status).toEqual(400)
-        expect(body).toHaveProperty('message', 'Phone must have minimum eleven characters')
+        expect(body).toHaveProperty('message', 'Phone must have a minimum of eleven characters')
 
         done()
       })
