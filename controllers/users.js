@@ -118,7 +118,6 @@ class UserController {
         })
       }
       
-      console.log(tiket.getPayload())
     } catch (err) {
       next(err)
     }
