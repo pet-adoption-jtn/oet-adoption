@@ -41,21 +41,26 @@ class FavoritesPetController {
     try {
       const allDataFav = await FavPetColl.aggregate([
         {
+          $match: {
+            user_id: ObjectID(req.userLoggedIn._id)
+          }
+        },
+        {
           $lookup: {
             from: 'Pets',
             localField: 'pet_id',
             foreignField: '_id',
-            as: 'Pet'
+            as: 'Pet',
+          }
+        },
+        {
+          $match: {
+            'Pet.status': false
           }
         },
         {
           $unwind: {
             path: '$Pet'
-          }
-        },
-        {
-          $match: {
-            user_id: ObjectID(req.userLoggedIn._id)
           }
         }
       ]).toArray()
