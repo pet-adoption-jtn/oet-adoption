@@ -28,9 +28,7 @@ class FavoritesPetController {
               ...newFavData.ops[0],
               Pet: pet_data
             })
-          } else {
-            throw { status: 400, message: 'Failed add to favorites' }
-          }   
+          }  
         }
       }
     } catch (err) {
