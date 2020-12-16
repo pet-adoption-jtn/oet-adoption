@@ -127,6 +127,24 @@ describe('add Favorites pet test', () => {
       .catch(done)
   })
 
+  it('add favorites pet fail (copy)', (done) => {
+    request(app)
+      .post('/favorites')
+      .set('access_token', access_token)
+      .send({
+        pet_id: InsertPet.ops[0]._id
+      })
+      .then(res => {
+        const { status, body } = res
+        expect(status).toEqual(400)
+        expect(body).toHaveProperty('message', 'Already in favorites')
+        done()
+      })
+      .catch(done)
+  })
+})
+
+describe('get favorites test', () => {
   it('get all Favorites pet success', (done) => {
     request(app)
       .get('/favorites')
@@ -140,7 +158,9 @@ describe('add Favorites pet test', () => {
       })
       .catch(done)
   })
+})
 
+describe('delete favorites test', () => {
   it('delete favorite pet user success', (done) => {
     request(app)
       .delete(`/favorites/${newDataPet.ops[0]._id}`)
@@ -149,6 +169,18 @@ describe('add Favorites pet test', () => {
         const { body, status } = res
         expect(status).toEqual(200)
         expect(body).toHaveProperty('msg', 'Successfully deleted one Pet Favorites.')
+        done()
+      })
+      .catch(done)
+  })
+  it('delete favorite failed (id not found)', (done) => {
+    request(app)
+      .delete(`/favorites/5fd08ff84860bd089c5c5369`)
+      .set('access_token', access_token)
+      .then(res => {
+        const { body, status } = res
+        expect(status).toEqual(404)
+        expect(body).toHaveProperty('message', 'No documents matched the query. Deleted 0 documents.')
         done()
       })
       .catch(done)
