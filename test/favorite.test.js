@@ -12,6 +12,7 @@ let CollUser;
 let UserLogin;
 let InsertPet;
 let CollPet;
+let petData;
 
 const user_data = {
   email: 'example@mail.com',
@@ -28,6 +29,21 @@ beforeAll(async () => {
   UserLogin = await CollUser.insertOne(user_data)
   InsertPet = await CollPet.insertOne({
     name: 'Kora',
+    breed: 'Alaskan Malamute',
+    age: 'baby',
+    gender: 'male',
+    color: 'white',
+    type: 'dog',
+    status: false,
+    request: [],
+    pictures: [
+      'https://upload.wikimedia.org/wikipedia/commons/9/9f/Alaskan_Malamute.jpg',
+      'https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/14141551/Alaskan-Malamute-puppies.jpg'
+    ],
+    user_id: ObjectID(UserLogin.ops[0]._id)
+  })
+  petData = await CollPet.insertOne({
+    name: 'Bumi',
     breed: 'Alaskan Malamute',
     age: 'baby',
     gender: 'male',
@@ -58,7 +74,7 @@ afterAll(async () => {
 describe('add Favorites pet test', () => {
   it('add favorites pet success', (done) => {
     const newPet = {
-      pet_id: InsertPet.ops[0]._id
+      pet_id: petData.ops[0]._id
     }
     request(app)
       .post('/favorites')
