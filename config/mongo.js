@@ -1,6 +1,5 @@
 const { MongoClient, ObjectID } = require('mongodb')
-const init = require('./db-setup')
-const uri = 'mongodb+srv://torian:torian05092002@cluster0.agovw.mongodb.net/?retryWrites=true&w=majority'
+const uri = process.env.MONGO_URI || 'mongodb://localhost:27017'
 
 const client = new MongoClient(uri, { useUnifiedTopology: true })
 
