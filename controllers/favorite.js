@@ -1,11 +1,13 @@
-const { db, ObjectID } = require('../config/mongo')
-const FavPetColl = db.collection('Favorites')
-const pets_collection = db.collection('Pets')
+const { getDatabase, ObjectID } = require('../config/mongo')
 
 class FavoritesPetController {
 
   static async postFavorite(req, res, next) {
     try {
+      const db = getDatabase()
+      const FavPetColl = db.collection('Favorites')
+      const pets_collection = db.collection('Pets')
+
       const { pet_id } = req.body
       if(!pet_id) {
         throw { message: 'Empty Data' , status: 400 }
@@ -39,6 +41,9 @@ class FavoritesPetController {
 
   static async getAllFavorite(req, res, next) {
     try {
+      const db = getDatabase()
+      const FavPetColl = db.collection('Favorites')
+
       const allDataFav = await FavPetColl.aggregate([
         {
           $match: {
@@ -73,6 +78,9 @@ class FavoritesPetController {
 
   static async deleteFavPet(req, res, next) {
     try {
+      const db = getDatabase()
+      const FavPetColl = db.collection('Favorites')
+      
       const id = req.params.id
       const delFavPet = await FavPetColl.deleteOne({ _id: ObjectID(id) })
       if( delFavPet.deletedCount === 1) {

@@ -1,4 +1,4 @@
-const { db } = require('../config/mongo')
+const { getDatabase } = require('../config/mongo')
 const { ObjectID } = require('mongodb')
 const { 
   sendMail, 
@@ -7,11 +7,13 @@ const {
   generateMessageDecline 
 } = require('../helpers/nodemailer')
 
-const pets = db.collection('Pets')
 
 class PetController {
   static async readAll (req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const petlist = await pets.aggregate([
         {
           $match: {
@@ -42,6 +44,9 @@ class PetController {
 
   static async getOnePet (req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const id = req.params.id
       const pet = await pets.aggregate([
         {
@@ -75,6 +80,9 @@ class PetController {
 
   static async addPet (req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const user = req.userLoggedIn
       const payload = { 
         name: req.body.name,
@@ -101,6 +109,9 @@ class PetController {
 
   static async requestAdoption(req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const { pet_detail, form_data, adopter } = req.body
       const updateRequest = await pets.findOneAndUpdate({
         "_id": ObjectID(pet_detail._id)
@@ -132,6 +143,9 @@ class PetController {
 
   static async getPetByOwner(req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const user_id = req.userLoggedIn._id
       const pet_owned = await pets.find({
         user_id: ObjectID(user_id)
@@ -144,6 +158,9 @@ class PetController {
 
   static async updatePet(req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const id = req.params.id
       const payload = { 
         name: req.body.name,
@@ -170,6 +187,9 @@ class PetController {
 
   static async adoptPet (req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const id = req.params.id
       const { status, adopter, pet } = req.body
 
@@ -220,6 +240,9 @@ class PetController {
 
   static async deletePet (req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+      
       const id = req.params.id
       const result = await pets.deleteOne({
         "_id": ObjectID(id)

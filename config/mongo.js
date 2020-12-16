@@ -1,16 +1,29 @@
 const { MongoClient, ObjectID } = require('mongodb')
-const uri = 'mongodb://localhost:27017'
+const init = require('./db-setup')
+const uri = 'mongodb+srv://torian:torian05092002@cluster0.agovw.mongodb.net/?retryWrites=true&w=majority'
 
 const client = new MongoClient(uri, { useUnifiedTopology: true })
 
-const connect = async () => await client.connect()
-connect()
-
 let db;
 
-db = client.db('adopt-us-testing')
+const connect = cb => {
+  client.connect(err => {
+    if (err) {
+      console.log('connection failed');
+    } else {
+      console.log('connected');
+      db = client.db('adopt-us')
+    }
+    cb(err)
+  })
+}
+
+const getDatabase = () => {
+  if (db) return db
+}
 
 module.exports = {
-  db,
-  ObjectID
+  ObjectID,
+  connect,
+  getDatabase
 }

@@ -1,13 +1,13 @@
-const { db } = require('../config/mongo')
+const { getDatabase } = require('../config/mongo')
 const { ObjectID } = require('mongodb')
 const { verifyToken } = require('../helpers/jwt')
-
-const users = db.collection('Users')
-const pets = db.collection('Pets')
 
 class Auth {
   static async authentication (req, res, next) {
     try {
+      const db = getDatabase()
+      const users = db.collection('Users')
+
       const { access_token } = req.headers
       if (!access_token) {
         throw { status: 401, message: 'Authentication Failed' }
@@ -30,6 +30,9 @@ class Auth {
 
   static async authorization (req, res, next) {
     try {
+      const db = getDatabase()
+      const pets = db.collection('Pets')
+
       const id = req.params.id
       const user_id = req.userLoggedIn._id
       const pet = await pets.findOne({

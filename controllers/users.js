@@ -1,14 +1,14 @@
-const { db, ObjectID } = require('../config/mongo');
+const { getDatabase, ObjectID } = require('../config/mongo');
 const { compare, hashPassword } = require('../helpers/bcrypt');
-const { signToken, verifyToken } = require('../helpers/jwt');
+const { signToken } = require('../helpers/jwt');
 const { OAuth2Client } = require('google-auth-library');
-const { decode } = require('jsonwebtoken');
 
-const users = db.collection('Users');
 
 class UserController {
   static async register(req, res, next) {
     try {
+      const db = getDatabase()
+      const users = db.collection('Users');
       const { username, email, password, address, phone } =  req.body
 
       if (username === null || email === null || password === null || address === null || phone === null) {
@@ -47,6 +47,8 @@ class UserController {
 
   static async login(req, res, next) {
     try {
+      const db = getDatabase()
+      const users = db.collection('Users');
       const { email, password } = req.body
       const payload = {
         email,
@@ -78,6 +80,9 @@ class UserController {
   static async googleSignIn(req, res, next) {
     /* istanbul ignore next */
     try {
+      const db = getDatabase()
+      const users = db.collection('Users');
+      
       const client = new OAuth2Client(process.env.CLIENT_ID);
       const { googleToken } = req.body
       const ticket = await client.verifyIdToken({
@@ -126,6 +131,9 @@ class UserController {
 
   static async editUser (req, res, next) {
     try {
+      const db = getDatabase()
+      const users = db.collection('Users');
+      
       const { username, email, address, phone } =  req.body 
       const updatedUser = await users.findOneAndUpdate({
         "_id": ObjectID(req.userLoggedIn._id)

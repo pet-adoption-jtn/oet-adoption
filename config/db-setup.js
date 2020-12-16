@@ -1,5 +1,3 @@
-const { db } = require('./mongo')
-
 async function init () {
   try {
     await db.createCollection('Users', {
@@ -128,4 +126,4 @@ async function init () {
   }
 }
 
-init()
+module.exports = init
