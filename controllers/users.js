@@ -1,7 +1,8 @@
 const { db, ObjectID } = require('../config/mongo');
 const { compare, hashPassword } = require('../helpers/bcrypt');
-const { signToken } = require('../helpers/jwt');
+const { signToken, verifyToken } = require('../helpers/jwt');
 const { OAuth2Client } = require('google-auth-library');
+const { decode } = require('jsonwebtoken');
 
 const users = db.collection('Users');
 
@@ -136,13 +137,7 @@ class UserController {
         returnOriginal: false
       })
       if (updatedUser.value) {
-        const access_token = signToken({
-          id: updatedUser.value._id,
-          username: updatedUser.value.username,
-          email: updatedUser.value.email
-        })
         res.status(200).json({
-          access_token,
           account: updatedUser.value
         })
       }

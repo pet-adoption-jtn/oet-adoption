@@ -11,7 +11,8 @@ class FavoritesPetController {
         throw { message: 'Empty Data' , status: 400 }
       } else {
         const favoriteCopy = await FavPetColl.findOne({
-          pet_id: ObjectID(pet_id)
+          pet_id: ObjectID(pet_id),
+          user_id: ObjectID(req.userLoggedIn._id)
         })
         if (favoriteCopy) {
           throw { status: 400, message: 'Already in favorites' }
@@ -40,21 +41,26 @@ class FavoritesPetController {
     try {
       const allDataFav = await FavPetColl.aggregate([
         {
+          $match: {
+            user_id: ObjectID(req.userLoggedIn._id)
+          }
+        },
+        {
           $lookup: {
             from: 'Pets',
             localField: 'pet_id',
             foreignField: '_id',
-            as: 'Pet'
+            as: 'Pet',
+          }
+        },
+        {
+          $match: {
+            'Pet.status': false
           }
         },
         {
           $unwind: {
             path: '$Pet'
-          }
-        },
-        {
-          $match: {
-            user_id: ObjectID(req.userLoggedIn._id)
           }
         }
       ]).toArray()

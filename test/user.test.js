@@ -293,7 +293,6 @@ describe('TEST ENDPOINT /edituser', () => {
       const { status, body } = res
 
       expect(status).toEqual(200)
-      expect(body).toHaveProperty('access_token', expect.any(String))
       expect(body).toHaveProperty('account', expect.any(Object))
 
       done()
