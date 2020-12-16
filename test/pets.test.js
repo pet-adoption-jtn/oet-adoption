@@ -262,7 +262,8 @@ describe('adopt pet tests', () => {
       .set('access_token', access_token)
       .send({
         status: true,
-        adopter: user_data
+        adopter: user_data,
+        pet: pet
       })
       .then((res) => {
         const { status, body } = res
@@ -278,7 +279,8 @@ describe('adopt pet tests', () => {
       .set('access_token', access_token)
       .send({
         status: false,
-        adopter: user_data
+        adopter: user_data,
+        pet: pet
       })
       .then((res) => {
         const { status, body } = res

@@ -10,20 +10,27 @@ class FavoritesPetController {
       if(!pet_id) {
         throw { message: 'Empty Data' , status: 400 }
       } else {
-        const newFavData = await FavPetColl.insertOne({
-          pet_id: ObjectID(pet_id),
-          user_id: ObjectID(req.userLoggedIn._id)
+        const favoriteCopy = await FavPetColl.findOne({
+          pet_id: ObjectID(pet_id)
         })
-        if (newFavData.insertedCount === 1) {
-          const pet_data = await pets_collection.findOne({
-            _id: ObjectID(pet_id)
-          })
-          res.status(200).json({
-            ...newFavData.ops[0],
-            Pet: pet_data
-          })
+        if (favoriteCopy) {
+          throw { status: 400, message: 'Already in favorites' }
         } else {
-          throw { status: 400, message: 'Failed add to favorites' }
+          const newFavData = await FavPetColl.insertOne({
+            pet_id: ObjectID(pet_id),
+            user_id: ObjectID(req.userLoggedIn._id)
+          })
+          if (newFavData.insertedCount === 1) {
+            const pet_data = await pets_collection.findOne({
+              _id: ObjectID(pet_id)
+            })
+            res.status(200).json({
+              ...newFavData.ops[0],
+              Pet: pet_data
+            })
+          } else {
+            throw { status: 400, message: 'Failed add to favorites' }
+          }   
         }
       }
     } catch (err) {

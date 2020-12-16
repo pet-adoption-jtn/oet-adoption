@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "set NODE_ENV=test && jest --forceExit --runInBand --verbose --detectOpenHandles",
+    "test": "set NODE_ENV=test && jest --forceExit --runInBand --verbose --detectOpenHandles --coverage",
     "start": "node app.js",
     "dev": "set NODE_ENV=development && nodemon app.js",
     "init-test": "set NODE_ENV=test && node ./config/db-setup.js",

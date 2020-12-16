@@ -38,8 +38,6 @@ class Auth {
       if (!pet) {
         throw { status: 404, message: 'Pet is not found' }
       } else if (pet.user_id.toString() !== user_id.toString()) {
-        console.log(pet.user_id);
-        console.log(user_id);
         throw { status: 401, message: 'Not Authorized' }
       } else {
         next()
