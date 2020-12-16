@@ -8,7 +8,7 @@ connect()
 
 let db;
 
-db = client.db('adopt-us')
+db = client.db('adopt-us-testing')
 
 module.exports = {
   db,

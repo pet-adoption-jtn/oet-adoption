@@ -11,7 +11,8 @@ class FavoritesPetController {
         throw { message: 'Empty Data' , status: 400 }
       } else {
         const favoriteCopy = await FavPetColl.findOne({
-          pet_id: ObjectID(pet_id)
+          pet_id: ObjectID(pet_id),
+          user_id: ObjectID(req.userLoggedIn._id)
         })
         if (favoriteCopy) {
           throw { status: 400, message: 'Already in favorites' }
@@ -28,7 +29,7 @@ class FavoritesPetController {
               ...newFavData.ops[0],
               Pet: pet_data
             })
-          }  
+          }   
         }
       }
     } catch (err) {
@@ -60,6 +61,7 @@ class FavoritesPetController {
       ]).toArray()
       res.status(200).json(allDataFav)
     } catch (err) {
+      /* istanbul ignore next */
       next(err)
     }
   }
