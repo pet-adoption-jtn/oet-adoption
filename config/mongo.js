@@ -8,7 +8,12 @@ connect()
 
 let db;
 
-db = client.db('adopt-us-testing')
+if (process.env.NODE_ENV === 'test') {
+  db = client.db('adopt-us-testing')
+} else {
+  db = client.db('adopt-us')
+}
+
 
 module.exports = {
   db,

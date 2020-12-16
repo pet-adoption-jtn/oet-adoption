@@ -28,8 +28,6 @@ class FavoritesPetController {
               ...newFavData.ops[0],
               Pet: pet_data
             })
-          } else {
-            throw { status: 400, message: 'Failed add to favorites' }
           }   
         }
       }
@@ -62,6 +60,7 @@ class FavoritesPetController {
       ]).toArray()
       res.status(200).json(allDataFav)
     } catch (err) {
+      /* istanbul ignore next */
       next(err)
     }
   }
